@@ -1,0 +1,2 @@
+org.springframework.boot.EnvironmentPostProcessor=\
+com.mailinbox.crm_service.config.DotenvEnvironmentPostProcessor

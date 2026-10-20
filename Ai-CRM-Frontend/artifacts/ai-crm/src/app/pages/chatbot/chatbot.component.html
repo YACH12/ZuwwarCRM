@@ -1,0 +1,43 @@
+@if (showFab) {
+  <button class="chat-fab" (click)="toggle()" [class.open]="isOpen()">
+    @if (!isOpen()) { 🤖 } @else { ✕ }
+  </button>
+}
+
+@if (isOpen()) {
+  <div class="chat-window" #chatWindow
+       [style.top.px]="position().top" [style.left.px]="position().left">
+    <div class="chat-header" (pointerdown)="demarrerDeplacement($event)">
+      <div class="chat-header-title">{{ t().headerTitle }}</div>
+      <div class="chat-header-sub">{{ t().headerSub }}</div>
+    </div>
+
+    <div class="chat-body">
+      @for (msg of messages(); track $index) {
+        <div class="chat-bubble" [class.user]="msg.role === 'user'" [class.assistant]="msg.role === 'assistant'">
+          {{ msg.content }}
+        </div>
+      }
+      @if (loading()) {
+        <div class="chat-bubble assistant loading-bubble">
+          <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+        </div>
+      }
+    </div>
+
+    @if (messages().length <= 1) {
+      <div class="chat-examples">
+        @for (ex of t().examples; track ex) {
+          <button class="example-chip" (click)="useExemple(ex)">{{ ex }}</button>
+        }
+      </div>
+    }
+
+    <div class="chat-input-row">
+      <input type="text" [(ngModel)]="inputMessage"
+        [placeholder]="t().inputPlaceholder"
+        (keyup.enter)="envoyer()"/>
+      <button (click)="envoyer()" [disabled]="loading()">➤</button>
+    </div>
+  </div>
+}

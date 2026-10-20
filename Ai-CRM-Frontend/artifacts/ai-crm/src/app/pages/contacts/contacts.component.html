@@ -1,0 +1,557 @@
+<div class="cnt-page">
+
+  <div class="cnt-header">
+    <div class="cnt-header-info">
+      <div class="cnt-breadcrumb">
+        <span>{{ t().breadcrumbCrm }}</span>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+        <span>{{ t().title }}</span>
+      </div>
+      <h1 class="cnt-title">{{ t().title }}</h1>
+      <p class="cnt-subtitle">{{ t().subtitle }}</p>
+    </div>
+    <div class="cnt-header-actions">
+      @if (canImportCsv()) {
+        <label class="cnt-btn-ghost file-label">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+          {{ t().importCsv }}
+          <input type="file" accept=".csv" class="file-hidden" (change)="onImportCSV($event)"/>
+        </label>
+      }
+      <button class="cnt-btn-primary" (click)="openAddModal()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        {{ t().newContact }}
+      </button>
+    </div>
+  </div>
+
+
+  <div class="cnt-kpi-row">
+    <div class="cnt-kpi-card">
+      <div class="cnt-kpi-icon kpi-purple">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
+          <circle cx="9" cy="7" r="4"/>
+          <path d="M23 21v-2a4 4 0 00-3-3.87"/>
+          <path d="M16 3.13a4 4 0 010 7.75"/>
+        </svg>
+      </div>
+      <div class="cnt-kpi-body">
+        <div class="cnt-kpi-value" style="color:#7C3AED">{{ totalElements() }}</div>
+        <div class="cnt-kpi-label">{{ t().kpi.total }}</div>
+      </div>
+    </div>
+    <div class="cnt-kpi-card">
+      <div class="cnt-kpi-icon kpi-green">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      <div class="cnt-kpi-body">
+        <div class="cnt-kpi-value kpi-val-green">{{ statsContacts().abonnes }}</div>
+        <div class="cnt-kpi-label">{{ t().kpi.subscribed }}</div>
+      </div>
+    </div>
+    <div class="cnt-kpi-card">
+      <div class="cnt-kpi-icon kpi-red">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      </div>
+      <div class="cnt-kpi-body">
+        <div class="cnt-kpi-value kpi-val-red">{{ statsContacts().desabonnes + statsContacts().bounced }}</div>
+        <div class="cnt-kpi-label">{{ t().kpi.inactive }}</div>
+      </div>
+    </div>
+    <div class="cnt-kpi-card">
+      <div class="cnt-kpi-icon kpi-amber">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M13 2L3 14h7v8l10-12h-7V2z"/></svg>
+      </div>
+      <div class="cnt-kpi-body">
+        <div class="cnt-kpi-value kpi-val-amber">{{ statsContacts().scoreMoyen }}</div>
+        <div class="cnt-kpi-label">{{ t().kpi.avgScore }}</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="cnt-toolbar">
+    <div class="cnt-search-box">
+      <svg class="cnt-search-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input class="cnt-search-input" type="text" [placeholder]="t().searchPlaceholder"
+        [value]="search()"
+        (input)="search.set($any($event.target).value)"/>
+    </div>
+
+    <div class="cnt-filters">
+      @for (f of filterOptions(); track f.value) {
+        <button class="cnt-filter-btn" [class.active]="activeFilter() === f.value"
+          [ngClass]="activeFilter() === f.value ? f.cls : ''"
+          (click)="activeFilter.set(f.value)">
+          {{ f.label }}
+          <span class="cnt-filter-count">{{ filterCount(f.value) }}</span>
+        </button>
+      }
+    </div>
+
+    <div class="cnt-toolbar-right">
+      @if (selectedCount() > 0) {
+        <div class="cnt-bulk-bar">
+          <span class="cnt-bulk-count">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            {{ selectedCount() }} {{ t().bulk.selected }}
+          </span>
+          <button class="cnt-bulk-del-btn" (click)="openBulkDeleteConfirm()">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>
+            {{ t().bulk.deleteSelection }}
+          </button>
+          <button class="cnt-bulk-cancel-btn" aria-label="Annuler la sélection" (click)="clearSelection()">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+      }
+      <span class="cnt-total-badge">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+        {{ totalElements() }} {{ t().totalBadge }}
+      </span>
+    </div>
+  </div>
+
+  <div class="cnt-table-card">
+    <div class="cnt-table-wrap">
+      <table class="cnt-table">
+        <thead>
+          <tr>
+            <th class="th-check">
+              <input type="checkbox" class="cnt-checkbox" [checked]="allSelected()" (change)="toggleSelectAll($any($event.target).checked)"/>
+            </th>
+            <th class="sortable" (click)="sortBy('nom')">
+              {{ t().table.contact }}
+              <span class="sort-caret" [class.sort-active]="isSorted('nom')">
+                @if (isSorted('nom') && sortDir() === 'asc') { ↑ } @else if (isSorted('nom') && sortDir() === 'desc') { ↓ } @else { ↕ }
+              </span>
+            </th>
+            <th class="sortable" (click)="sortBy('telephone')">
+              {{ t().table.phone }}
+              <span class="sort-caret" [class.sort-active]="isSorted('telephone')">
+                @if (isSorted('telephone') && sortDir() === 'asc') { ↑ } @else if (isSorted('telephone') && sortDir() === 'desc') { ↓ } @else { ↕ }
+              </span>
+            </th>
+            <th class="sortable" (click)="sortBy('status')">
+              {{ t().table.status }}
+              <span class="sort-caret" [class.sort-active]="isSorted('status')">
+                @if (isSorted('status') && sortDir() === 'asc') { ↑ } @else if (isSorted('status') && sortDir() === 'desc') { ↓ } @else { ↕ }
+              </span>
+            </th>
+            <th class="sortable" (click)="sortBy('source')">
+              {{ t().table.source }}
+              <span class="sort-caret" [class.sort-active]="isSorted('source')">
+                @if (isSorted('source') && sortDir() === 'asc') { ↑ } @else if (isSorted('source') && sortDir() === 'desc') { ↓ } @else { ↕ }
+              </span>
+            </th>
+            <th class="sortable" (click)="sortBy('scoreEngagement')">
+              {{ t().table.score }}
+              <span class="sort-caret" [class.sort-active]="isSorted('scoreEngagement')">
+                @if (isSorted('scoreEngagement') && sortDir() === 'asc') { ↑ } @else if (isSorted('scoreEngagement') && sortDir() === 'desc') { ↓ } @else { ↕ }
+              </span>
+            </th>
+            <th class="th-actions">{{ t().table.actions }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          @if (loading()) {
+            @for (i of [1,2,3,4,5,6,7,8]; track i) {
+              <tr class="skeleton-tr">
+                <td><div class="sk sk-check"></div></td>
+                <td>
+                  <div class="cnt-cell">
+                    <div class="sk sk-avatar"></div>
+                    <div class="sk-info">
+                      <div class="sk sk-line w55"></div>
+                      <div class="sk sk-line w35"></div>
+                    </div>
+                  </div>
+                </td>
+                <td><div class="sk sk-line w40"></div></td>
+                <td><div class="sk sk-badge"></div></td>
+                <td><div class="sk sk-line w30"></div></td>
+                <td><div class="sk sk-badge"></div></td>
+                <td></td>
+              </tr>
+            }
+          }
+
+          @if (!loading()) {
+            @for (c of filtered(); track c.id) {
+              <tr class="cnt-row">
+                <td class="td-check" (click)="$event.stopPropagation()">
+                  <input type="checkbox" class="cnt-checkbox" [checked]="selectedIds().has(c.id!)" (change)="toggleSelect(c.id!, $any($event.target).checked)"/>
+                </td>
+
+                <td>
+                  <div class="cnt-cell">
+                    <div class="cnt-avatar" [style.background]="scoreBg(c.scoreEngagement)" [style.color]="scoreColor(c.scoreEngagement)">
+                      {{ initials(c.nom, c.prenom) }}
+                    </div>
+                    <div class="cnt-info">
+                      <span class="cnt-name">{{ c.prenom }} {{ c.nom }}</span>
+                      <span class="cnt-email">{{ c.email }}</span>
+                    </div>
+                  </div>
+                </td>
+
+                <td class="td-muted">{{ c.telephone || '—' }}</td>
+
+                <td>
+                  <span class="cnt-status-badge" [style.background]="statusBg(c.status)" [style.color]="statusColor(c.status)">
+                    {{ statusLabel(c.status) }}
+                  </span>
+                </td>
+
+                <td>
+                  <span class="cnt-source-chip">{{ sourceFr(c.source) }}</span>
+                </td>
+
+                <td>
+                  <span class="cnt-score-badge" [style.background]="scoreBg(c.scoreEngagement)" [style.color]="scoreColor(c.scoreEngagement)">
+                    {{ c.scoreEngagement || 0 }}
+                  </span>
+                </td>
+
+                <td class="td-actions" (click)="$event.stopPropagation()">
+                  <div class="cnt-row-actions">
+                    <button class="cnt-action-btn" [title]="t().actions.edit" [attr.aria-label]="t().actions.edit" (click)="openEditModal(c)">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                    </button>
+                    <button class="cnt-action-btn cnt-del-btn" [title]="t().actions.delete" [attr.aria-label]="t().actions.delete" (click)="openDeleteConfirm(c)">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            }
+
+            @if (!loading() && filtered().length === 0) {
+              <tr>
+                <td colspan="7">
+                  <div class="cnt-empty">
+                    <div class="cnt-empty-icon">
+                      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#CBD5E1" stroke-width="1.5"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+                    </div>
+                    <p class="cnt-empty-title">{{ t().empty.title }}</p>
+                    <p class="cnt-empty-sub">{{ t().empty.sub }}</p>
+                    <button class="cnt-btn-primary" (click)="openAddModal()">
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                      {{ t().newContact }}
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            }
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <div class="cnt-pagination">
+      <span class="cnt-page-info">
+        {{ paginationText() }}
+      </span>
+      <div class="cnt-page-nav">
+        <button class="cnt-page-btn" aria-label="Page précédente" (click)="prevPage()" [disabled]="currentPage() === 0">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        @for (p of pageNumbers; track p) {
+          <button class="cnt-page-num" [class.active]="p === currentPage()" (click)="goToPage(p)">
+            {{ p + 1 }}
+          </button>
+        }
+        <button class="cnt-page-btn" aria-label="Page suivante" (click)="nextPage()" [disabled]="currentPage() >= totalPages - 1">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+@if (showAddModal()) {
+  <div class="cnt-modal-overlay" (click)="showAddModal.set(false)" (keydown.escape)="showAddModal.set(false)">
+    <div class="cnt-modal" role="dialog" aria-modal="true" [attr.aria-label]="t().modal.addTitle" (click)="$event.stopPropagation()">
+      <div class="cnt-modal-hd">
+        <div class="cnt-modal-title-row">
+          <div class="cnt-modal-icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+          </div>
+          <h2 class="cnt-modal-title">{{ t().modal.addTitle }}</h2>
+        </div>
+        <button class="cnt-modal-close" aria-label="Fermer" (click)="showAddModal.set(false)">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+
+      <div class="cnt-modal-body">
+        @if (saveError()) {
+          <div class="cnt-alert alert-error" style="margin-bottom:16px">{{ saveError() }}</div>
+        }
+
+        <div class="cnt-field span2">
+          <label class="cnt-label">{{ t().modal.contactType }}</label>
+          <div class="cnt-type-tabs">
+            <button class="cnt-type-tab" [class.tab-active]="newContact.typeContact === 'INDIVIDU'" (click)="newContact.typeContact = 'INDIVIDU'">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              {{ t().modal.individual }}
+            </button>
+            <button class="cnt-type-tab" [class.tab-active]="newContact.typeContact === 'ENTREPRISE'" (click)="newContact.typeContact = 'ENTREPRISE'">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+              {{ t().modal.companyTab }}
+            </button>
+          </div>
+        </div>
+
+        <div class="cnt-field">
+          <label class="cnt-label">{{ t().modal.lastName }} <span class="cnt-req">*</span></label>
+          <input class="cnt-input" type="text" [(ngModel)]="newContact.nom" [placeholder]="t().modal.lastNamePlaceholder"/>
+        </div>
+        <div class="cnt-field">
+          <label class="cnt-label">{{ t().modal.firstName }}</label>
+          <input class="cnt-input" type="text" [(ngModel)]="newContact.prenom" [placeholder]="t().modal.firstNamePlaceholder"/>
+        </div>
+        <div class="cnt-field">
+          <label class="cnt-label">{{ t().modal.email }} <span class="cnt-req">*</span></label>
+          <input class="cnt-input" type="email" [(ngModel)]="newContact.email" [placeholder]="t().modal.emailPlaceholder"/>
+        </div>
+        <div class="cnt-field">
+          <label class="cnt-label">{{ t().modal.phone }}</label>
+          <input class="cnt-input" type="text" [(ngModel)]="newContact.telephone" [placeholder]="t().modal.phonePlaceholder"/>
+        </div>
+
+        @if (newContact.typeContact === 'ENTREPRISE') {
+          <div class="cnt-field">
+            <label class="cnt-label">{{ t().modal.company }}</label>
+            <select class="cnt-select" [(ngModel)]="newContact.entrepriseId">
+              <option [value]="0">{{ t().modal.companySelectPlaceholder }}</option>
+              @for (e of entreprises(); track e.id) { <option [value]="e.id">{{ e.nom }}</option> }
+            </select>
+          </div>
+          <div class="cnt-field">
+            <label class="cnt-label">{{ t().modal.position }}</label>
+            <input class="cnt-input" type="text" [(ngModel)]="newContact.poste" [placeholder]="t().modal.positionPlaceholder"/>
+          </div>
+        }
+
+        <div class="cnt-field">
+          <label class="cnt-label">{{ t().modal.source }}</label>
+          <select class="cnt-select" [(ngModel)]="newContact.source">
+            <option value="MANUAL">{{ t().source.manual }}</option>
+            <option value="IMPORT">{{ t().source.import }}</option>
+            <option value="API">{{ t().source.api }}</option>
+          </select>
+        </div>
+        <div class="cnt-field">
+          <label class="cnt-label">{{ t().modal.status }}</label>
+          <select class="cnt-select" [(ngModel)]="newContact.status">
+            <option value="ABONNE">{{ t().status.subscribed }}</option>
+            <option value="DESABONNE">{{ t().status.unsubscribed }}</option>
+            <option value="BOUNCED">{{ t().status.bounced }}</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="cnt-modal-ft">
+        <button class="cnt-btn-cancel" (click)="showAddModal.set(false)" [disabled]="saving()">{{ t().modal.cancel }}</button>
+        <button class="cnt-btn-primary" (click)="saveContact()" [disabled]="saving()">
+          @if (saving()) { <span class="cnt-spinner"></span> {{ t().modal.creating }} }
+          @else { {{ t().modal.saveContact }} }
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+@if (showBulkDeleteModal()) {
+  <div class="cnt-modal-overlay" (click)="cancelBulkDelete()" (keydown.escape)="cancelBulkDelete()">
+    <div class="cnt-modal cnt-modal-sm" role="dialog" aria-modal="true" [attr.aria-label]="t().deleteModal.deleteSelectionTitle" (click)="$event.stopPropagation()">
+      <div class="cnt-del-modal-hd">
+        <div class="cnt-del-icon-wrap">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="2">
+            <polyline points="3 6 5 6 21 6"/>
+            <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a1 1 0 011-1h4a1 1 0 011 1v2"/>
+            <line x1="10" y1="11" x2="10" y2="17"/>
+            <line x1="14" y1="11" x2="14" y2="17"/>
+          </svg>
+        </div>
+        <div>
+          <h2 class="cnt-del-title">{{ t().deleteModal.deleteSelectionTitle }}</h2>
+          <p class="cnt-del-sub">{{ withCount(t().deleteModal.bulkSub, selectedCount()) }}</p>
+        </div>
+      </div>
+      <div class="cnt-del-body">
+        <div class="cnt-bulk-list">
+          @for (c of selectedContacts(); track c.id) {
+            <div class="cnt-bulk-list-item">
+              <div class="cnt-avatar cnt-bulk-avatar" [style.background]="scoreBg(c.scoreEngagement)" [style.color]="scoreColor(c.scoreEngagement)">
+                {{ initials(c.nom, c.prenom) }}
+              </div>
+              <div>
+                <div class="cnt-del-contact-name">{{ c.prenom }} {{ c.nom }}</div>
+                <div class="cnt-del-contact-email">{{ c.email }}</div>
+              </div>
+            </div>
+          }
+        </div>
+        <p class="cnt-del-warning" style="margin-top:14px">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          {{ t().deleteModal.bulkWarning }}
+        </p>
+      </div>
+      <div class="cnt-modal-ft">
+        <button class="cnt-btn-cancel" (click)="cancelBulkDelete()" [disabled]="deletingBulk()">{{ t().modal.cancel }}</button>
+        <button class="cnt-btn-danger" (click)="confirmBulkDelete()" [disabled]="deletingBulk()">
+          @if (deletingBulk()) {
+            <span class="cnt-spinner cnt-spinner-white"></span> {{ t().deleteModal.deleting }}
+          } @else {
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>
+            {{ withCount(t().deleteModal.deleteCount, selectedCount()) }}
+          }
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+@if (showDeleteModal()) {
+  <div class="cnt-modal-overlay" (click)="cancelDelete()" (keydown.escape)="cancelDelete()">
+    <div class="cnt-modal cnt-modal-sm" role="dialog" aria-modal="true" [attr.aria-label]="t().deleteModal.deleteContactTitle" (click)="$event.stopPropagation()">
+      <div class="cnt-del-modal-hd">
+        <div class="cnt-del-icon-wrap">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="2">
+            <polyline points="3 6 5 6 21 6"/>
+            <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a1 1 0 011-1h4a1 1 0 011 1v2"/>
+            <line x1="10" y1="11" x2="10" y2="17"/>
+            <line x1="14" y1="11" x2="14" y2="17"/>
+          </svg>
+        </div>
+        <div>
+          <h2 class="cnt-del-title">{{ t().deleteModal.deleteContactTitle }}</h2>
+          <p class="cnt-del-sub">{{ t().deleteModal.irreversible }}</p>
+        </div>
+      </div>
+
+      <div class="cnt-del-body">
+        <div class="cnt-del-contact-card">
+          <div class="cnt-avatar cnt-del-avatar" [style.background]="scoreBg(contactToDelete()?.scoreEngagement!)" [style.color]="scoreColor(contactToDelete()?.scoreEngagement!)">
+            {{ initials(contactToDelete()?.nom!, contactToDelete()?.prenom!) }}
+          </div>
+          <div>
+            <div class="cnt-del-contact-name">{{ contactToDelete()?.prenom }} {{ contactToDelete()?.nom }}</div>
+            <div class="cnt-del-contact-email">{{ contactToDelete()?.email }}</div>
+          </div>
+        </div>
+        <p class="cnt-del-warning">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          {{ t().deleteModal.singleWarning }}
+        </p>
+      </div>
+
+      <div class="cnt-modal-ft">
+        <button class="cnt-btn-cancel" (click)="cancelDelete()" [disabled]="deletingContact()">{{ t().modal.cancel }}</button>
+        <button class="cnt-btn-danger" (click)="confirmDelete()" [disabled]="deletingContact()">
+          @if (deletingContact()) {
+            <span class="cnt-spinner cnt-spinner-white"></span> {{ t().deleteModal.deleting }}
+          } @else {
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>
+            {{ t().deleteModal.deletePermanently }}
+          }
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<div class="cnt-toast-container">
+  @for (t of toasts(); track t.id) {
+    <div class="cnt-toast" [ngClass]="'toast-' + t.type">
+      <div class="cnt-toast-icon">
+        @if (t.type === 'success') {
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        }
+        @if (t.type === 'error') {
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        }
+        @if (t.type === 'info') {
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        }
+        @if (t.type === 'warning') {
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        }
+      </div>
+      <div class="cnt-toast-body">
+        <div class="cnt-toast-msg">{{ t.message }}</div>
+        @if (t.sub) { <div class="cnt-toast-sub">{{ t.sub }}</div> }
+      </div>
+      <button class="cnt-toast-close" aria-label="Fermer" (click)="removeToast(t.id)">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+      <div class="cnt-toast-progress"></div>
+    </div>
+  }
+</div>
+
+@if (showEditModal()) {
+  <div class="cnt-modal-overlay" (click)="showEditModal.set(false)" (keydown.escape)="showEditModal.set(false)">
+    <div class="cnt-modal" role="dialog" aria-modal="true" [attr.aria-label]="t().modal.editTitle" (click)="$event.stopPropagation()">
+      <div class="cnt-modal-hd">
+        <div class="cnt-modal-title-row">
+          <div class="cnt-modal-icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+          </div>
+          <h2 class="cnt-modal-title">{{ t().modal.editTitle }}</h2>
+        </div>
+        <button class="cnt-modal-close" aria-label="Fermer" (click)="showEditModal.set(false)">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+
+      <div class="cnt-modal-body">
+        @if (saveError()) {
+          <div class="cnt-alert alert-error" style="margin-bottom:16px">{{ saveError() }}</div>
+        }
+        <div class="cnt-field">
+          <label class="cnt-label">{{ t().modal.lastName }} <span class="cnt-req">*</span></label>
+          <input class="cnt-input" type="text" [(ngModel)]="editContact.nom"/>
+        </div>
+        <div class="cnt-field">
+          <label class="cnt-label">{{ t().modal.firstName }}</label>
+          <input class="cnt-input" type="text" [(ngModel)]="editContact.prenom"/>
+        </div>
+        <div class="cnt-field">
+          <label class="cnt-label">{{ t().modal.email }} <span class="cnt-req">*</span></label>
+          <input class="cnt-input" type="email" [(ngModel)]="editContact.email"/>
+        </div>
+        <div class="cnt-field">
+          <label class="cnt-label">{{ t().modal.phone }}</label>
+          <input class="cnt-input" type="text" [(ngModel)]="editContact.telephone"/>
+        </div>
+        <div class="cnt-field">
+          <label class="cnt-label">{{ t().modal.source }}</label>
+          <select class="cnt-select" [(ngModel)]="editContact.source">
+            <option value="MANUAL">{{ t().source.manual }}</option>
+            <option value="IMPORT">{{ t().source.import }}</option>
+            <option value="API">{{ t().source.api }}</option>
+          </select>
+        </div>
+        <div class="cnt-field">
+          <label class="cnt-label">{{ t().modal.status }}</label>
+          <select class="cnt-select" [(ngModel)]="editContact.status">
+            <option value="ABONNE">{{ t().status.subscribed }}</option>
+            <option value="DESABONNE">{{ t().status.unsubscribed }}</option>
+            <option value="BOUNCED">{{ t().status.bounced }}</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="cnt-modal-ft">
+        <button class="cnt-btn-cancel" (click)="showEditModal.set(false)" [disabled]="saving()">{{ t().modal.cancel }}</button>
+        <button class="cnt-btn-primary" (click)="updateContact()" [disabled]="saving()">
+          @if (saving()) { <span class="cnt-spinner"></span> {{ t().modal.saving }} }
+          @else { {{ t().modal.updateContact }} }
+        </button>
+      </div>
+    </div>
+  </div>
+}

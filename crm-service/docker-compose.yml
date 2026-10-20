@@ -1,0 +1,156 @@
+services:
+
+  # ── Zookeeper ──────────────────────────────────────────────────────────────
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.5.0
+    restart: unless-stopped
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "22181:2181"
+    networks:
+      - zuwwar-net
+
+  # ── Kafka ──────────────────────────────────────────────────────────────────
+  kafka:
+    image: confluentinc/cp-kafka:7.5.0
+    restart: unless-stopped
+    depends_on:
+      - zookeeper
+    ports:
+      - "39092:9092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:39092,PLAINTEXT_INTERNAL://kafka:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_INTERNAL:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT_INTERNAL
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+    networks:
+      - zuwwar-net
+
+  # ── PostgreSQL ─────────────────────────────────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: mail_inbox_crm
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: yach
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - zuwwar-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ── Keycloak ───────────────────────────────────────────────────────────────
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.0.0
+    restart: unless-stopped
+    command: start-dev
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: ${KEYCLOAK_ADMIN_USER}
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://postgres:5432/keycloak
+      KC_DB_USERNAME: postgres
+      KC_DB_PASSWORD: yach
+     
+      KC_HOSTNAME: keycloak.local
+      KC_HOSTNAME_PORT: 8080
+      KC_HOSTNAME_STRICT: "false"
+      KC_HTTP_ENABLED: "true"
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./keycloak-themes:/opt/keycloak/themes
+    networks:
+      - zuwwar-net
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # ── Spring Boot CRM ────────────────────────────────────────────────────────
+  crm-backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - "8081:8081"
+    extra_hosts:
+     
+      - "keycloak.local:host-gateway"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/mail_inbox_crm
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: yach
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      AI_SERVICE_URL: http://ai-service:8000
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://keycloak.local:8080/realms/mail-inbox
+      KEYCLOAK_AUTH_SERVER_URL: http://keycloak:8080
+      KEYCLOAK_REALM: mail-inbox
+      KEYCLOAK_EXPECTED_AUDIENCE: crm-frontend
+      KEYCLOAK_ADMIN_CLIENT_ID: zuwwar-admin-service
+      KEYCLOAK_ADMIN_CLIENT_SECRET: ${KEYCLOAK_ADMIN_CLIENT_SECRET}
+      GMAIL_USERNAME: ${GMAIL_USERNAME}
+      GMAIL_PASSWORD: ${GMAIL_PASSWORD}
+      ENCRYPTION_SECRET: ${ENCRYPTION_SECRET}
+      
+      BOOTSTRAP_ADMIN_KEYCLOAK_ID: ${BOOTSTRAP_ADMIN_KEYCLOAK_ID}
+      BOOTSTRAP_ADMIN_EMAIL: ${BOOTSTRAP_ADMIN_EMAIL}
+      BOOTSTRAP_ADMIN_NOM: ${BOOTSTRAP_ADMIN_NOM}
+      BOOTSTRAP_ADMIN_PRENOM: ${BOOTSTRAP_ADMIN_PRENOM}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_started
+      keycloak:
+        condition: service_started
+    networks:
+      - zuwwar-net
+
+  # ── Microservice IA (FastAPI - scoring / NLP / RAG) ─────────────────────────
+  ai-service:
+    build:
+      context: ../ai-service
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - "8100:8000"
+    env_file:
+      - ../ai-service/.env
+    environment:
+      # Écoute Kafka via le listener interne du broker (mêmes noms de réseau
+      # que crm-backend), pas le "localhost:39092" utilisé hors Docker.
+      KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      BACKEND_URL: http://crm-backend:8081
+    volumes:
+      - ../ai-service/models:/app/models
+      - ../ai-service/knowledge:/app/knowledge
+      - ../ai-service/chroma_data:/app/chroma_data
+    depends_on:
+      kafka:
+        condition: service_started
+      crm-backend:
+        condition: service_started
+    networks:
+      - zuwwar-net
+
+# ── Volumes ────────────────────────────────────────────────────────────────
+volumes:
+  postgres_data:
+
+# ── Network ────────────────────────────────────────────────────────────────
+networks:
+  zuwwar-net:
+    driver: bridge

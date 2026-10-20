@@ -1,0 +1,25 @@
+FROM eclipse-temurin:21-jdk-alpine AS build
+WORKDIR /app
+COPY .mvn/ .mvn/
+COPY mvnw pom.xml ./
+RUN ./mvnw dependency:go-offline -q
+COPY src/ src/
+RUN ./mvnw package -DskipTests -q
+
+FROM eclipse-temurin:21-jre-alpine
+WORKDIR /app
+COPY --from=build /app/target/*.jar app.jar
+
+# Fait confiance au root CA d'Avast (Web/Mail Shield) déjà approuvé par Windows sur cette machine
+# de dev — sans ça le JVM rejette toute connexion TLS sortante (IMAP/SMTP inclus) interceptée par
+# l'antivirus local. N'affecte que le trust store Java à l'intérieur de ce conteneur.
+COPY avast-root.cer /tmp/avast-root.cer
+RUN keytool -importcert -noprompt -trustcacerts \
+    -alias avast-root \
+    -file /tmp/avast-root.cer \
+    -keystore "$JAVA_HOME/lib/security/cacerts" \
+    -storepass changeit \
+    && rm /tmp/avast-root.cer
+
+EXPOSE 8081
+ENTRYPOINT ["java", "-jar", "app.jar"]

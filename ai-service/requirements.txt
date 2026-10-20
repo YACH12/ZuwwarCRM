@@ -1,0 +1,32 @@
+fastapi
+uvicorn[standard]
+python-dotenv
+pydantic
+httpx
+
+# Kafka
+kafka-python
+
+# Data / ML (lead scoring - modèle .pkl chargé via joblib)
+pandas
+joblib
+scikit-learn==1.6.1
+xgboost
+
+# NLP (zero-shot classification, mDeBERTa-v3)
+# --extra-index-url pour récupérer la roue CPU-only de torch (image bien plus légère)
+--extra-index-url https://download.pytorch.org/whl/cpu
+transformers
+torch
+
+# RAG (LangChain + Groq + Chroma + embeddings HuggingFace)
+langchain
+langchain-community
+langchain-core
+langchain-groq
+langchain-text-splitters
+langchain-chroma
+chromadb
+sentence-transformers
+groq
+pypdf

@@ -1,0 +1,356 @@
+<div class="act-page">
+
+  <!-- ── Header ── -->
+  <div class="act-header">
+    <div class="act-header-info">
+      <div class="act-breadcrumb">
+        <span>{{ t().breadcrumbCrm }}</span>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+        <span>{{ t().breadcrumbActivities }}</span>
+      </div>
+      <h1 class="act-title">{{ t().title }}</h1>
+      <p class="act-subtitle">{{ t().subtitle }}</p>
+    </div>
+    <div class="act-header-actions">
+      <div class="act-search-box">
+        <svg class="search-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input class="act-search-input" type="text" [placeholder]="t().searchPlaceholder"
+          [value]="rechercheQuery()"
+          (input)="rechercheQuery.set($any($event.target).value)"/>
+      </div>
+      <button class="act-btn-create" (click)="showModal.set(true)">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        {{ t().newActivity }}
+      </button>
+    </div>
+  </div>
+
+  <!-- ── KPI Cards ── -->
+  <div class="act-kpi-row">
+    <div class="act-kpi-card">
+      <div class="act-kpi-icon kpi-total">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+      </div>
+      <div class="act-kpi-body">
+        <div class="act-kpi-value">{{ stats().totalActivites || 0 }}</div>
+        <div class="act-kpi-label">{{ t().kpi.total }}</div>
+      </div>
+    </div>
+    <div class="act-kpi-card">
+      <div class="act-kpi-icon kpi-todo">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      </div>
+      <div class="act-kpi-body">
+        <div class="act-kpi-value kpi-todo-val">{{ stats().tachesAFaire || 0 }}</div>
+        <div class="act-kpi-label">{{ t().kpi.todo }}</div>
+      </div>
+    </div>
+    <div class="act-kpi-card">
+      <div class="act-kpi-icon kpi-progress">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      </div>
+      <div class="act-kpi-body">
+        <div class="act-kpi-value kpi-progress-val">{{ stats().tachesEnCours || 0 }}</div>
+        <div class="act-kpi-label">{{ t().kpi.inProgress }}</div>
+      </div>
+    </div>
+    <div class="act-kpi-card">
+      <div class="act-kpi-icon kpi-done">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      <div class="act-kpi-body">
+        <div class="act-kpi-value kpi-done-val">{{ stats().tachesTerminees || 0 }}</div>
+        <div class="act-kpi-label">{{ t().kpi.done }}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Layout ── -->
+  <div class="act-layout">
+
+    <!-- Sidebar Filters -->
+    <aside class="act-sidebar">
+      <div class="act-sidebar-hd">
+        <span>{{ t().sidebar.filters }}</span>
+        @if (hasActiveFilters) {
+          <button class="act-clear-btn" (click)="resetFiltres()">{{ t().sidebar.clear }}</button>
+        }
+      </div>
+
+      <div class="act-sidebar-section">
+        <div class="act-section-title">{{ t().sidebar.type }}</div>
+        @for (opt of typeOptions; track opt.value) {
+          <div class="act-filter-radio" [class.active]="filtreType() === opt.value" (click)="filtreType.set(opt.value)">
+            <div class="act-radio-dot" [class.is-active]="filtreType() === opt.value"></div>
+            <span>{{ opt.label }}</span>
+          </div>
+        }
+      </div>
+
+      <div class="act-sidebar-divider"></div>
+
+      <div class="act-sidebar-section">
+        <div class="act-section-title">{{ t().sidebar.status }}</div>
+        @for (s of statutOptions; track s.value) {
+          <label class="act-filter-check" [class.is-checked]="filtresStatut().includes(s.value)">
+            <input type="checkbox" [checked]="filtresStatut().includes(s.value)" (change)="toggleStatutFiltre(s.value)"/>
+            <div class="act-check-dot" [ngClass]="s.dotClass"></div>
+            <span>{{ s.label }}</span>
+          </label>
+        }
+      </div>
+
+      <div class="act-sidebar-divider"></div>
+
+      <div class="act-sidebar-section">
+        <div class="act-section-title">{{ t().sidebar.priority }}</div>
+        @for (p of prioriteOptions; track p.value) {
+          <label class="act-filter-check" [class.is-checked]="filtrePriorite().includes(p.value)">
+            <input type="checkbox" [checked]="filtrePriorite().includes(p.value)" (change)="togglePrioriteFiltre(p.value)"/>
+            <div class="act-check-dot" [ngClass]="p.dotClass"></div>
+            <span>{{ p.label }}</span>
+          </label>
+        }
+      </div>
+    </aside>
+
+    <!-- Activity Feed -->
+    <main class="act-feed">
+
+      <!-- Skeleton loader -->
+      @if (loading()) {
+        <div class="act-skeleton-list">
+          @for (i of [1,2,3,4]; track i) {
+            <div class="act-skeleton-card">
+              <div class="sk-dot"></div>
+              <div class="sk-body">
+                <div class="sk-line" style="width:55%"></div>
+                <div class="sk-line" style="width:35%"></div>
+                <div class="sk-line" style="width:75%"></div>
+              </div>
+            </div>
+          }
+        </div>
+      }
+
+      @if (!loading()) {
+        <!-- Empty state -->
+        @if (activitesGroupees.length === 0) {
+          <div class="act-empty">
+            <div class="act-empty-icon">
+              <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#CBD5E1" stroke-width="1.5">
+                <path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>
+              </svg>
+            </div>
+            <h3 class="act-empty-title">{{ t().empty.title }}</h3>
+            <p class="act-empty-sub">
+              @if (hasActiveFilters) { {{ t().empty.noResults }} }
+              @else { {{ t().empty.noActivities }} }
+            </p>
+            @if (!hasActiveFilters) {
+              <button class="act-btn-create" (click)="showModal.set(true)">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                {{ t().newActivity }}
+              </button>
+            }
+          </div>
+        }
+
+        <!-- Timeline grouped by date -->
+        @for (groupe of activitesGroupees; track groupe.label) {
+          <div class="act-group">
+            <div class="act-group-header">
+              <span class="act-group-label">{{ groupe.label }}</span>
+              <div class="act-group-line"></div>
+              <span class="act-group-count">{{ groupe.activites.length }}</span>
+            </div>
+
+            <div class="act-timeline">
+              @for (a of groupe.activites; track a.id; let last = $last) {
+                <div class="act-item">
+                  <!-- Timeline indicator -->
+                  <div class="act-item-indicator">
+                    <div class="act-item-dot"
+                      [class.dot-todo]="a.statut === 'A_FAIRE'"
+                      [class.dot-progress]="a.statut === 'EN_COURS'"
+                      [class.dot-done]="a.statut === 'TERMINEE'"
+                      [class.dot-cancelled]="a.statut === 'ANNULEE'">
+                    </div>
+                    @if (!last) { <div class="act-item-line"></div> }
+                  </div>
+
+                  <!-- Activity Card -->
+                  <div class="act-card"
+                    [ngClass]="borderClass(a)"
+                    [class.act-card-done]="a.statut === 'TERMINEE'">
+
+                    <!-- Card header -->
+                    <div class="act-card-hd">
+                      <div class="act-type-icon" [ngClass]="'type-icon-' + a.type">
+                        @if (a.type === 'TACHE') {
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+                        }
+                        @if (a.type === 'NOTE') {
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                        }
+                        @if (a.type === 'SYSTEME') {
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
+                        }
+                      </div>
+
+                      <div class="act-card-info">
+                        <div class="act-card-title" [class.title-done]="a.statut === 'TERMINEE'">{{ a.titre }}</div>
+                        <div class="act-card-badges">
+                          <span [ngClass]="['act-badge', 'badge-type-' + a.type.toLowerCase()]">{{ labelType(a.type) }}</span>
+                          @if (a.statut) {
+                            <span [ngClass]="['act-badge', statutBadgeClass(a.statut!)]">{{ labelStatut(a.statut!) }}</span>
+                          }
+                          @if (a.priorite && a.type === 'TACHE') {
+                            <span [ngClass]="['act-badge', prioriteBadgeClass(a.priorite!)]">{{ labelPriorite(a.priorite!) }}</span>
+                          }
+                          @if (isOverdue(a)) {
+                            <span class="act-badge badge-overdue">{{ t().overdue }}</span>
+                          }
+                        </div>
+                      </div>
+
+                      <div class="act-card-controls">
+                        @if (a.type === 'TACHE' && a.statut !== 'TERMINEE') {
+                          <select class="act-statut-select" [value]="a.statut" (change)="changerStatut(a, $any($event.target).value)">
+                            <option value="A_FAIRE">{{ t().statusOptions.todo }}</option>
+                            <option value="EN_COURS">{{ t().statusOptions.inProgress }}</option>
+                            <option value="TERMINEE">{{ t().statusOptions.done }}</option>
+                          </select>
+                        }
+                        @if (a.type !== 'SYSTEME') {
+                          <button class="act-btn-del" (click)="supprimer(a.id!)" [title]="t().deleteTitle" [attr.aria-label]="t().deleteTitle">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>
+                          </button>
+                        }
+                      </div>
+                    </div>
+
+                    @if (a.description) {
+                      <p class="act-card-desc">{{ a.description }}</p>
+                    }
+
+                    <div class="act-card-ft">
+                      <div class="act-chips">
+                        @if (a.contact) {
+                          <span class="act-chip chip-contact">
+                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                            {{ a.contact.prenom }} {{ a.contact.nom }}
+                          </span>
+                        }
+                        @if (a.deal) {
+                          <span class="act-chip chip-deal">
+                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg>
+                            {{ a.deal.titre }}
+                          </span>
+                        }
+                        @if (a.dateEcheance) {
+                          <span class="act-chip" [class.chip-overdue]="isOverdue(a)">
+                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                            {{ t().dueDatePrefix }} {{ formatDate(a.dateEcheance) }}
+                          </span>
+                        }
+                      </div>
+                      <div class="act-creator">
+                        @if (a.creePar) {
+                          <div class="act-avatar">{{ a.creePar.charAt(0).toUpperCase() }}</div>
+                          <span class="act-creator-name">{{ a.creePar }}</span>
+                          <span class="act-sep">·</span>
+                        }
+                        <span class="act-creator-date">{{ formatDate(a.dateCreation!) }}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+        }
+      }
+    </main>
+  </div>
+</div>
+
+<!-- ── Create Modal ── -->
+@if (showModal()) {
+  <div class="act-modal-overlay" (click)="showModal.set(false)" (keydown.escape)="showModal.set(false)">
+    <div class="act-modal" role="dialog" aria-modal="true" [attr.aria-label]="t().modal.title" (click)="$event.stopPropagation()">
+
+      <div class="act-modal-hd">
+        <h2 class="act-modal-title">{{ t().modal.title }}</h2>
+        <button class="act-modal-close" aria-label="Fermer" (click)="showModal.set(false)">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+
+      <div class="act-modal-tabs">
+        <button class="act-modal-tab" [class.tab-active]="newActivite.type === 'TACHE'" (click)="newActivite.type = 'TACHE'">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+          {{ t().modal.task }}
+        </button>
+        <button class="act-modal-tab" [class.tab-active]="newActivite.type === 'NOTE'" (click)="newActivite.type = 'NOTE'">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          {{ t().modal.note }}
+        </button>
+      </div>
+
+      <div class="act-modal-body">
+        <div class="act-field">
+          <label class="act-field-label">{{ t().modal.fieldTitle }} <span class="req">*</span></label>
+          <input class="act-field-input" type="text" [(ngModel)]="newActivite.titre" [placeholder]="t().modal.fieldTitlePlaceholder"/>
+        </div>
+        <div class="act-field">
+          <label class="act-field-label">{{ t().modal.fieldDescription }}</label>
+          <textarea class="act-field-textarea" [(ngModel)]="newActivite.description" rows="3" [placeholder]="t().modal.fieldDescriptionPlaceholder"></textarea>
+        </div>
+        @if (newActivite.type === 'TACHE') {
+          <div class="act-field-row">
+            <div class="act-field">
+              <label class="act-field-label">{{ t().modal.fieldPriority }}</label>
+              <select class="act-field-select" [(ngModel)]="newActivite.priorite">
+                <option value="BASSE">{{ t().priorityOptions.low }}</option>
+                <option value="NORMALE">{{ t().priorityOptions.normal }}</option>
+                <option value="HAUTE">{{ t().priorityOptions.high }}</option>
+              </select>
+            </div>
+            <div class="act-field">
+              <label class="act-field-label">{{ t().modal.fieldDueDate }}</label>
+              <input class="act-field-input" type="datetime-local" [(ngModel)]="newActivite.dateEcheance"/>
+            </div>
+          </div>
+        }
+        <div class="act-field-row">
+          <div class="act-field">
+            <label class="act-field-label">{{ t().modal.fieldContact }}</label>
+            <select class="act-field-select" [(ngModel)]="newActivite.contactId">
+              <option [value]="null">{{ t().modal.none }}</option>
+              @for (c of contacts(); track c.id) {
+                <option [value]="c.id">{{ c.prenom }} {{ c.nom }}</option>
+              }
+            </select>
+          </div>
+          <div class="act-field">
+            <label class="act-field-label">{{ t().modal.fieldDeal }}</label>
+            <select class="act-field-select" [(ngModel)]="newActivite.dealId">
+              <option [value]="null">{{ t().modal.none }}</option>
+              @for (d of deals(); track d.id) {
+                <option [value]="d.id">{{ d.titre }}</option>
+              }
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="act-modal-ft">
+        <button class="act-modal-cancel" (click)="showModal.set(false)">{{ t().modal.cancel }}</button>
+        <button class="act-modal-submit" (click)="creer()" [disabled]="!newActivite.titre">
+          {{ t().modal.submit }}
+        </button>
+      </div>
+    </div>
+  </div>
+}

@@ -1,0 +1,582 @@
+<div [attr.dir]="t().dir" class="min-h-screen bg-white text-gray-900 overflow-x-hidden">
+
+  <!-- ── Navbar ── -->
+  <nav [class.scrolled]="scrolled()" class="fixed top-0 left-0 right-0 z-50 bg-white transition-all duration-300">
+    <div class="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between gap-6">
+
+      <!-- Logo -->
+      <a routerLink="/" class="flex items-center flex-shrink-0">
+<img src="/zuwwar-logo-transparent.png" alt="Logo Zuwwar" 
+     style="height: 36px; width: auto;">  </a>
+
+      <!-- Desktop nav links -->
+      <div class="hidden md:flex items-center gap-6 text-sm font-medium text-gray-600">
+        <a href="#features" class="hover:text-violet-600 transition-colors">{{ t().nav.features }}</a>
+        <a href="#ai" class="hover:text-violet-600 transition-colors flex items-center gap-1">
+          <svg class="h-3.5 w-3.5 text-violet-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+          {{ t().nav.ai }}
+        </a>
+        <a href="#workflow" class="hover:text-violet-600 transition-colors">{{ t().nav.workflow }}</a>
+        <a href="#pricing" class="hover:text-violet-600 transition-colors">{{ t().nav.pricing }}</a>
+        <a href="#testimonials" class="hover:text-violet-600 transition-colors">{{ t().nav.testimonials }}</a>
+      </div>
+
+      <!-- Desktop right: lang switcher + buttons -->
+      <div class="hidden md:flex items-center gap-3">
+        <div class="flex items-center gap-0.5 bg-gray-100 rounded-lg p-0.5">
+          @for (opt of langOptions; track opt.code) {
+            <button (click)="setLang(opt.code)"
+              [class]="lang() === opt.code
+                ? 'flex items-center gap-1 px-2.5 py-1.5 rounded-md text-xs font-bold bg-white text-violet-700 shadow-sm'
+                : 'flex items-center gap-1 px-2.5 py-1.5 rounded-md text-xs font-bold text-gray-500 hover:text-gray-700'">
+              <span>{{ opt.flag }}</span><span>{{ opt.label }}</span>
+            </button>
+          }
+        </div>
+        <button (click)="login()" class="text-sm font-medium text-gray-600 hover:text-violet-600 px-4 py-2 transition-colors">
+         {{ t().nav.login }}</button>
+        <a routerLink="/signup" class="bg-violet-600 hover:bg-violet-700 text-white text-sm font-semibold px-5 py-2.5 rounded-lg transition-colors">
+          {{ t().nav.cta }}
+        </a>
+      </div>
+
+      <!-- Mobile hamburger -->
+      <button class="md:hidden p-2 text-gray-600" (click)="toggleMenu()">
+        @if (menuOpen()) {
+          <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        } @else {
+          <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+        }
+      </button>
+    </div>
+
+    <!-- Mobile menu -->
+    @if (menuOpen()) {
+      <div class="md:hidden bg-white border-t border-gray-100 px-6 py-4 flex flex-col gap-4 text-sm font-medium">
+        <a href="#features" (click)="menuOpen.set(false)" class="text-gray-700">{{ t().nav.features }}</a>
+        <a href="#ai" (click)="menuOpen.set(false)" class="text-gray-700">{{ t().nav.ai }}</a>
+        <a href="#workflow" (click)="menuOpen.set(false)" class="text-gray-700">{{ t().nav.workflow }}</a>
+        <a href="#pricing" (click)="menuOpen.set(false)" class="text-gray-700">{{ t().nav.pricing }}</a>
+        <div class="flex gap-2 flex-wrap">
+          @for (opt of langOptions; track opt.code) {
+            <button (click)="setLang(opt.code)"
+              [class]="lang() === opt.code
+                ? 'flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-bold border bg-violet-600 text-white border-violet-600'
+                : 'flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-bold border border-gray-200 text-gray-600'">
+              {{ opt.flag }} {{ opt.label }}
+            </button>
+          }
+        </div>
+        <a (click)="login(); menuOpen.set(false)" class="text-gray-700">{{ t().nav.login }}</a>
+        <a routerLink="/signup" (click)="menuOpen.set(false)" class="bg-violet-600 text-white text-center py-2.5 rounded-lg font-semibold">
+          {{ t().nav.cta }}
+        </a>
+      </div>
+    }
+  </nav>
+
+  <main class="pt-16">
+
+    <!-- ── Hero ── -->
+    <section class="relative min-h-[92vh] flex items-center justify-center overflow-hidden hero-bg">
+      <!-- Zellige background SVG -->
+      <svg class="zellige-pattern" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <pattern id="zellige" x="0" y="0" width="60" height="60" patternUnits="userSpaceOnUse">
+            <path d="M30 0 L60 30 L30 60 L0 30 Z" fill="none" stroke="#7B5CF6" stroke-width="0.8"/>
+            <path d="M30 10 L50 30 L30 50 L10 30 Z" fill="none" stroke="#F59E0B" stroke-width="0.5"/>
+            <circle cx="30" cy="30" r="4" fill="none" stroke="#7B5CF6" stroke-width="0.5"/>
+          </pattern>
+        </defs>
+        <rect width="100%" height="100%" fill="url(#zellige)"/>
+      </svg>
+      <div class="absolute top-0 right-0 w-[600px] h-[600px] bg-gradient-to-bl from-violet-200/40 to-transparent rounded-full blur-3xl pointer-events-none"></div>
+      <div class="absolute bottom-0 left-0 w-[400px] h-[400px] bg-gradient-to-tr from-amber-200/30 to-transparent rounded-full blur-3xl pointer-events-none"></div>
+
+      <div class="relative z-10 max-w-4xl mx-auto px-6 text-center">
+        <!-- Badge -->
+        <div class="hero-animate hero-delay-1 inline-flex items-center gap-2 mb-6 px-4 py-1.5 rounded-full bg-violet-100 text-violet-700 text-sm font-semibold border border-violet-200">
+          <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+          {{ t().hero.badge }}
+        </div>
+
+        <!-- H1 -->
+        <h1 class="hero-animate hero-delay-2 text-5xl md:text-6xl lg:text-7xl font-extrabold tracking-tight mb-6 leading-[1.08]">
+          {{ t().hero.h1a }}&nbsp;<span class="gradient-text">{{ t().hero.h1b }}</span>
+        </h1>
+
+        <!-- Subtitle -->
+        <p class="hero-animate hero-delay-3 text-lg text-gray-500 mb-10 max-w-2xl mx-auto leading-relaxed">
+          {{ t().hero.subtitle }}
+        </p>
+
+        <!-- CTA buttons -->
+        <div class="hero-animate hero-delay-4 flex flex-col sm:flex-row items-center justify-center gap-4 mb-12">
+          <a routerLink="/signup" class="flex items-center gap-2 bg-violet-600 hover:bg-violet-700 text-white font-semibold px-8 py-4 rounded-xl text-lg transition-all shadow-lg shadow-violet-200 hover:shadow-violet-300 hover:-translate-y-0.5">
+            {{ t().hero.ctaPrimary }}
+            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+          </a>
+          <a href="#features" class="flex items-center gap-2 border border-gray-200 bg-white hover:border-violet-300 text-gray-700 font-semibold px-8 py-4 rounded-xl text-lg transition-all hover:-translate-y-0.5">
+            {{ t().hero.ctaSecondary }}
+          </a>
+        </div>
+
+        <!-- Trust badges -->
+        <div class="hero-animate hero-delay-5 flex flex-wrap items-center justify-center gap-6 text-sm text-gray-500">
+          @for (trust of [t().hero.trust1, t().hero.trust2, t().hero.trust3]; track $index) {
+            <span class="flex items-center gap-1.5">
+              <svg class="h-4 w-4 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+              {{ trust }}
+            </span>
+          }
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Trusted by ── -->
+    <section class="py-12 border-y border-gray-100 bg-gray-50">
+      <div class="max-w-5xl mx-auto px-6 text-center">
+        <p class="text-sm font-semibold uppercase tracking-widest text-gray-400 mb-8">{{ t().trusted.label }}</p>
+        <div class="flex flex-wrap justify-center items-center gap-x-12 gap-y-4">
+          @for (brand of brands; track $index) {
+            <span class="text-xl font-bold text-gray-300 hover:text-gray-400 transition-colors cursor-default">{{ brand }}</span>
+          }
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Core Features ── -->
+    <section id="features" class="py-24 bg-white">
+      <div class="max-w-6xl mx-auto px-6">
+
+        <!-- Section header -->
+        <div appReveal class="text-center max-w-2xl mx-auto mb-20">
+          <p class="text-violet-600 font-semibold text-sm uppercase tracking-widest mb-3">{{ t().features.label }}</p>
+          <h2 class="text-4xl md:text-5xl font-extrabold mb-4 tracking-tight">{{ t().features.h2 }}</h2>
+          <p class="text-gray-500 text-lg">{{ t().features.sub }}</p>
+        </div>
+
+        <!-- Feature row 1: text left, mockup right -->
+        <div class="grid lg:grid-cols-2 gap-16 items-center mb-24">
+          <div appReveal>
+            <span class="inline-block bg-violet-100 text-violet-700 text-xs font-bold uppercase tracking-widest px-3 py-1 rounded-full mb-4">{{ t().features.f1tag }}</span>
+            <h3 class="text-3xl font-extrabold mb-4 tracking-tight">{{ t().features.f1h }}</h3>
+            <p class="text-gray-500 text-lg leading-relaxed mb-8">{{ t().features.f1p }}</p>
+            <ul class="space-y-3">
+              @for (item of t().features.f1items; track $index) {
+                <li class="flex items-center gap-3 text-gray-700">
+                  <svg class="h-5 w-5 text-violet-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                  {{ item }}
+                </li>
+              }
+            </ul>
+          </div>
+          <div appReveal class="reveal-delay-2 relative">
+            <div class="absolute inset-0 -m-4 bg-gradient-to-br from-violet-100 to-amber-50 rounded-3xl"></div>
+            <div class="relative rounded-2xl bg-white border border-gray-200 shadow-xl overflow-hidden p-6">
+              <div class="flex items-center gap-3 mb-5 pb-4 border-b border-gray-100">
+                <div class="h-10 w-10 rounded-full bg-gradient-to-br from-violet-500 to-blue-500 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">AB</div>
+                <div>
+                  <div class="font-bold text-gray-900 text-sm">Ahmed Benali</div>
+                  <div class="text-xs text-gray-500">Directeur Général · Casablanca</div>
+                </div>
+                <span class="ml-auto bg-green-100 text-green-700 text-xs font-semibold px-2.5 py-1 rounded-full">Active</span>
+              </div>
+              <div class="grid grid-cols-3 gap-3 mb-5">
+                <div class="rounded-xl p-3 border bg-violet-50 border-violet-100">
+                  <div class="text-xs text-gray-500 mb-1">Valeur</div>
+                  <div class="font-bold text-gray-900 text-sm">284 000 DH</div>
+                </div>
+                <div class="rounded-xl p-3 border bg-blue-50 border-blue-100">
+                  <div class="text-xs text-gray-500 mb-1">Réunions</div>
+                  <div class="font-bold text-gray-900 text-sm">12</div>
+                </div>
+                <div class="rounded-xl p-3 border bg-amber-50 border-amber-100">
+                  <div class="text-xs text-gray-500 mb-1">Score IA</div>
+                  <div class="font-bold text-gray-900 text-sm">98/100</div>
+                </div>
+              </div>
+              <div class="space-y-2">
+                <div class="flex items-center gap-3 text-sm"><div class="h-2 w-2 rounded-full bg-violet-500 flex-shrink-0"></div><span class="text-gray-700 flex-1">Proposition envoyée</span><span class="text-gray-400 text-xs">Aujourd'hui</span></div>
+                <div class="flex items-center gap-3 text-sm"><div class="h-2 w-2 rounded-full bg-blue-500 flex-shrink-0"></div><span class="text-gray-700 flex-1">Appel de suivi</span><span class="text-gray-400 text-xs">Hier</span></div>
+                <div class="flex items-center gap-3 text-sm"><div class="h-2 w-2 rounded-full bg-amber-500 flex-shrink-0"></div><span class="text-gray-700 flex-1">Réunion initiale</span><span class="text-gray-400 text-xs">15 mai</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Arabesque divider -->
+        <div class="arabesque">
+          <svg width="320" height="24" viewBox="0 0 320 24" fill="none">
+            <line x1="0" y1="12" x2="120" y2="12" stroke="#E5E7EB" stroke-width="1"/>
+            <path d="M140 12 C145 6,150 18,155 12 C160 6,165 18,170 12 C175 6,180 18,185 12" stroke="#7B5CF6" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+            <circle cx="160" cy="12" r="3" fill="#F59E0B"/>
+            <line x1="200" y1="12" x2="320" y2="12" stroke="#E5E7EB" stroke-width="1"/>
+          </svg>
+        </div>
+
+        <!-- Feature row 2: mockup left, text right -->
+        <div class="grid lg:grid-cols-2 gap-16 items-center my-24">
+          <div appReveal class="relative lg:order-2">
+            <div class="absolute inset-0 -m-4 bg-gradient-to-bl from-amber-50 to-violet-50 rounded-3xl"></div>
+            <div class="relative rounded-2xl bg-white border border-gray-200 shadow-xl overflow-hidden p-6">
+              <div class="text-sm font-bold text-gray-900 mb-4">Pipeline de ventes</div>
+              <div class="grid grid-cols-3 gap-3">
+                <div>
+                  <div class="text-xs font-semibold text-gray-500 uppercase mb-3">Prospects <span class="bg-gray-100 rounded px-1 py-0.5 text-gray-600 normal-case">8</span></div>
+                  <div class="space-y-2">
+                    <div class="bg-gray-50 border-l-4 border-l-blue-400 rounded-lg p-2 text-xs font-medium text-gray-700 shadow-sm">Société Atlas</div>
+                    <div class="bg-gray-50 border-l-4 border-l-blue-400 rounded-lg p-2 text-xs font-medium text-gray-700 shadow-sm">Riad Palmeraie</div>
+                    <div class="border-2 border-dashed border-gray-200 rounded-lg p-2 text-center text-gray-400 text-xs">+</div>
+                  </div>
+                </div>
+                <div>
+                  <div class="text-xs font-semibold text-gray-500 uppercase mb-3">En cours <span class="bg-gray-100 rounded px-1 py-0.5 text-gray-600 normal-case">5</span></div>
+                  <div class="space-y-2">
+                    <div class="bg-gray-50 border-l-4 border-l-violet-500 rounded-lg p-2 text-xs font-medium text-gray-700 shadow-sm">Tech Maroc</div>
+                    <div class="bg-gray-50 border-l-4 border-l-violet-500 rounded-lg p-2 text-xs font-medium text-gray-700 shadow-sm">Hotel Fassia</div>
+                    <div class="border-2 border-dashed border-gray-200 rounded-lg p-2 text-center text-gray-400 text-xs">+</div>
+                  </div>
+                </div>
+                <div>
+                  <div class="text-xs font-semibold text-gray-500 uppercase mb-3">Gagné <span class="bg-gray-100 rounded px-1 py-0.5 text-gray-600 normal-case">3</span></div>
+                  <div class="space-y-2">
+                    <div class="bg-gray-50 border-l-4 border-l-green-400 rounded-lg p-2 text-xs font-medium text-gray-700 shadow-sm">Express Tanger</div>
+                    <div class="border-2 border-dashed border-gray-200 rounded-lg p-2 text-center text-gray-400 text-xs">+</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div appReveal class="reveal-delay-2 lg:order-1">
+            <span class="inline-block bg-blue-100 text-blue-700 text-xs font-bold uppercase tracking-widest px-3 py-1 rounded-full mb-4">{{ t().features.f2tag }}</span>
+            <h3 class="text-3xl font-extrabold mb-4 tracking-tight">{{ t().features.f2h }}</h3>
+            <p class="text-gray-500 text-lg leading-relaxed mb-8">{{ t().features.f2p }}</p>
+            <ul class="space-y-3">
+              @for (item of t().features.f2items; track $index) {
+                <li class="flex items-center gap-3 text-gray-700">
+                  <svg class="h-5 w-5 text-blue-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                  {{ item }}
+                </li>
+              }
+            </ul>
+          </div>
+        </div>
+
+        <!-- Arabesque divider -->
+        <div class="arabesque">
+          <svg width="320" height="24" viewBox="0 0 320 24" fill="none">
+            <line x1="0" y1="12" x2="120" y2="12" stroke="#E5E7EB" stroke-width="1"/>
+            <path d="M140 12 C145 6,150 18,155 12 C160 6,165 18,170 12 C175 6,180 18,185 12" stroke="#7B5CF6" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+            <circle cx="160" cy="12" r="3" fill="#F59E0B"/>
+            <line x1="200" y1="12" x2="320" y2="12" stroke="#E5E7EB" stroke-width="1"/>
+          </svg>
+        </div>
+
+        <!-- Feature row 3: text left, mockup right -->
+        <div class="grid lg:grid-cols-2 gap-16 items-center mt-24">
+          <div appReveal>
+            <span class="inline-block bg-amber-100 text-amber-700 text-xs font-bold uppercase tracking-widest px-3 py-1 rounded-full mb-4">{{ t().features.f3tag }}</span>
+            <h3 class="text-3xl font-extrabold mb-4 tracking-tight">{{ t().features.f3h }}</h3>
+            <p class="text-gray-500 text-lg leading-relaxed mb-8">{{ t().features.f3p }}</p>
+            <ul class="space-y-3">
+              @for (item of t().features.f3items; track $index) {
+                <li class="flex items-center gap-3 text-gray-700">
+                  <svg class="h-5 w-5 text-amber-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                  {{ item }}
+                </li>
+              }
+            </ul>
+          </div>
+          <div appReveal class="reveal-delay-2 relative">
+            <div class="absolute inset-0 -m-4 bg-gradient-to-br from-amber-100/60 to-violet-50 rounded-3xl"></div>
+            <div class="relative rounded-2xl bg-white border border-gray-200 shadow-xl overflow-hidden p-6">
+              <div class="flex items-center justify-between mb-5">
+                <div class="font-bold text-gray-900 text-sm">Vue d'ensemble</div>
+                <span class="text-xs text-gray-500 bg-gray-100 rounded-full px-2.5 py-1">Ce mois</span>
+              </div>
+              <div class="grid grid-cols-2 gap-3 mb-5">
+                <div class="rounded-xl p-4 bg-gradient-to-br from-violet-500 to-violet-700 text-white">
+                  <div class="text-xs text-violet-200 mb-1">Chiffre d'affaires</div>
+                  <div class="font-extrabold text-xl">1.2M DH</div>
+                  <div class="text-xs text-green-300 mt-1">↑ +24%</div>
+                </div>
+                <div class="rounded-xl p-4 bg-gradient-to-br from-blue-500 to-blue-700 text-white">
+                  <div class="text-xs text-blue-200 mb-1">Deals signés</div>
+                  <div class="font-extrabold text-xl">38</div>
+                  <div class="text-xs text-green-300 mt-1">↑ +11%</div>
+                </div>
+              </div>
+              <div class="space-y-3">
+                @for (bar of [{label: 'Casablanca', pct: 72, color: 'bg-violet-500'}, {label: 'Rabat', pct: 48, color: 'bg-blue-500'}, {label: 'Tanger', pct: 31, color: 'bg-amber-500'}]; track $index) {
+                  <div>
+                    <div class="flex justify-between text-xs text-gray-500 mb-1"><span>{{ bar.label }}</span><span>{{ bar.pct }}%</span></div>
+                    <div class="h-2 bg-gray-100 rounded-full overflow-hidden">
+                      <div [class]="bar.color + ' h-full rounded-full'" [style.width]="bar.pct + '%'"></div>
+                    </div>
+                  </div>
+                }
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ── AI Section ── -->
+    <section id="ai" class="py-24 ai-section-bg relative overflow-hidden">
+      <svg class="zellige-pattern" style="opacity:0.06" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <pattern id="zellige-ai" x="0" y="0" width="60" height="60" patternUnits="userSpaceOnUse">
+            <path d="M30 0 L60 30 L30 60 L0 30 Z" fill="none" stroke="#fff" stroke-width="0.8"/>
+            <path d="M30 10 L50 30 L30 50 L10 30 Z" fill="none" stroke="#F59E0B" stroke-width="0.5"/>
+            <circle cx="30" cy="30" r="3" fill="none" stroke="#fff" stroke-width="0.5"/>
+          </pattern>
+        </defs>
+        <rect width="100%" height="100%" fill="url(#zellige-ai)"/>
+      </svg>
+
+      <div class="max-w-6xl mx-auto px-6 relative z-10">
+        <!-- Header -->
+        <div appReveal class="text-center max-w-2xl mx-auto mb-16">
+          <div class="inline-flex items-center gap-2 bg-white/10 rounded-full px-4 py-1.5 text-amber-300 text-sm font-semibold mb-4 border border-white/20">
+            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+            {{ t().ai.label }}
+          </div>
+          <h2 class="text-4xl md:text-5xl font-extrabold text-white mb-4 tracking-tight">{{ t().ai.h2 }}</h2>
+          <p class="text-violet-200 text-lg">{{ t().ai.sub }}</p>
+        </div>
+
+        <!-- AI feature cards -->
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
+          @for (feat of t().ai.features; track $index) {
+            <div appReveal [class]="'reveal-delay-' + ($index + 1)" class="bg-white/8 backdrop-blur-sm border border-white/15 rounded-2xl p-6 hover:bg-white/12 transition-all hover-lift">
+              @if (feat.badge) {
+                <span class="inline-block bg-amber-400 text-amber-900 text-xs font-bold px-2.5 py-0.5 rounded-full mb-3">{{ feat.badge }}</span>
+              }
+              <h4 class="text-white font-bold text-lg mb-3">{{ feat.title }}</h4>
+              <p class="text-violet-200 text-sm leading-relaxed">{{ feat.desc }}</p>
+            </div>
+          }
+        </div>
+
+        <!-- Live client score demo -->
+        <div appReveal class="bg-white/8 backdrop-blur-sm border border-white/15 rounded-2xl p-8">
+          <div class="flex items-center gap-3 mb-6">
+            <div class="h-8 w-8 rounded-lg bg-amber-400/20 flex items-center justify-center">
+              <svg class="h-4 w-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
+            </div>
+            <div>
+              <p class="text-white font-bold">Score IA des Clients</p>
+              <p class="text-violet-300 text-xs">Mise à jour en temps réel</p>
+            </div>
+            <div class="ml-auto flex items-center gap-1.5">
+              <div class="h-2 w-2 rounded-full bg-green-400 animate-pulse"></div>
+              <span class="text-green-400 text-xs font-medium">Live</span>
+            </div>
+          </div>
+          <div class="space-y-4">
+            @for (lead of aiLeads; track $index) {
+              <div class="flex items-center gap-4">
+                <div class="h-9 w-9 rounded-full bg-gradient-to-br from-violet-500 to-blue-500 flex items-center justify-center text-white font-bold text-xs flex-shrink-0">
+                  {{ lead.name.charAt(0) }}{{ lead.name.split(' ').length > 1 ? lead.name.split(' ')[1].charAt(0) : '' }}
+                </div>
+                <div class="flex-1 min-w-0">
+                  <div class="flex items-center justify-between mb-1">
+                    <span class="text-white text-sm font-semibold truncate">{{ lead.name }}</span>
+                    <span [class]="scoreColor(lead.score)" class="text-xs font-bold px-2.5 py-0.5 rounded-full ml-2 flex-shrink-0">{{ lead.score }}</span>
+                  </div>
+                  <div class="score-bar-track">
+                    <div [class]="'score-bar-fill ' + scoreBarColor(lead.score)" [style.width]="lead.score + '%'"></div>
+                  </div>
+                </div>
+                <span [class]="lead.trend.startsWith('+') ? 'text-green-400' : 'text-red-400'" class="text-xs font-bold flex-shrink-0">{{ lead.trend }}</span>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Stats ── -->
+    <section class="py-20 bg-white border-b border-gray-100">
+      <div class="max-w-5xl mx-auto px-6">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
+          @for (stat of t().stats; track $index) {
+            <div appReveal [class]="'reveal-delay-' + ($index + 1)" class="text-center">
+              <div class="text-4xl font-extrabold text-violet-600 mb-1">{{ stat.value }}</div>
+              <div class="text-gray-700 font-semibold text-sm mb-0.5">{{ stat.label }}</div>
+              <div class="text-gray-400 text-xs">{{ stat.sub }}</div>
+            </div>
+          }
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Workflow ── -->
+    <section id="workflow" class="py-24 bg-gray-50">
+      <div class="max-w-4xl mx-auto px-6 text-center">
+        <div appReveal class="mb-16">
+          <p class="text-violet-600 font-semibold text-sm uppercase tracking-widest mb-3">{{ t().workflow.label }}</p>
+          <h2 class="text-4xl md:text-5xl font-extrabold mb-4 tracking-tight">{{ t().workflow.h2 }}</h2>
+          <p class="text-gray-500 text-lg">{{ t().workflow.sub }}</p>
+        </div>
+        <div class="grid md:grid-cols-3 gap-8">
+          @for (step of t().workflow.steps; track $index) {
+            <div appReveal [class]="'reveal-delay-' + ($index + 1)" class="relative">
+              <div class="h-14 w-14 rounded-2xl bg-violet-600 text-white font-extrabold text-xl flex items-center justify-center mx-auto mb-5 shadow-lg shadow-violet-200">
+                {{ $index + 1 }}
+              </div>
+              @if ($index < t().workflow.steps.length - 1) {
+                <div class="hidden md:block absolute top-7 left-[calc(50%+28px)] right-[calc(-50%+28px)] h-0.5 bg-gradient-to-r from-violet-300 to-gray-200"></div>
+              }
+              <h4 class="font-extrabold text-gray-900 text-lg mb-3">{{ step.title }}</h4>
+              <p class="text-gray-500 text-sm leading-relaxed">{{ step.desc }}</p>
+            </div>
+          }
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Testimonials ── -->
+    <section id="testimonials" class="py-24 bg-white">
+      <div class="max-w-6xl mx-auto px-6">
+        <div appReveal class="text-center max-w-2xl mx-auto mb-16">
+          <p class="text-violet-600 font-semibold text-sm uppercase tracking-widest mb-3">{{ t().testimonials.label }}</p>
+          <h2 class="text-4xl md:text-5xl font-extrabold mb-4 tracking-tight">{{ t().testimonials.h2 }}</h2>
+          <p class="text-gray-500 text-lg">{{ t().testimonials.sub }}</p>
+        </div>
+        <div class="grid md:grid-cols-3 gap-8">
+          @for (item of t().testimonials.items; track $index) {
+            <div appReveal [class]="'reveal-delay-' + ($index + 1)" class="bg-gray-50 rounded-2xl p-8 border border-gray-100 hover-lift">
+              <div class="flex gap-1 mb-4">
+                @for (star of [1,2,3,4,5]; track star) {
+                  <svg class="h-4 w-4 text-amber-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                }
+              </div>
+              <p class="text-gray-700 text-sm leading-relaxed mb-6 italic">"{{ item.quote }}"</p>
+              <div class="flex items-center gap-3">
+                <div class="h-10 w-10 rounded-full bg-gradient-to-br from-violet-500 to-blue-500 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">{{ item.initials }}</div>
+                <div>
+                  <div class="font-bold text-gray-900 text-sm">{{ item.name }}</div>
+                  <div class="text-xs text-gray-500">{{ item.title }} · {{ item.company }}</div>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Pricing ── -->
+    <section id="pricing" class="py-24 bg-gray-50">
+      <div class="max-w-6xl mx-auto px-6">
+        <div appReveal class="text-center max-w-2xl mx-auto mb-16">
+          <p class="text-violet-600 font-semibold text-sm uppercase tracking-widest mb-3">{{ t().pricing.label }}</p>
+          <h2 class="text-4xl md:text-5xl font-extrabold mb-4 tracking-tight">{{ t().pricing.h2 }}</h2>
+          <p class="text-gray-500 text-lg">{{ t().pricing.sub }}</p>
+        </div>
+        <div class="grid md:grid-cols-3 gap-8 items-stretch">
+          @for (plan of t().pricing.plans; track $index) {
+            <div appReveal [class]="'reveal-delay-' + ($index + 1) + (plan.badge ? ' popular-glow' : '')"
+              class="rounded-2xl overflow-hidden border border-gray-200 bg-white flex flex-col hover-lift">
+              <!-- Plan header -->
+              <div [class]="plan.headerBg + ' p-6'">
+                @if (plan.badge) {
+                  <div class="inline-block bg-amber-400 text-amber-900 text-xs font-extrabold px-3 py-1 rounded-full mb-3">{{ plan.badge }}</div>
+                }
+                <h3 [class]="plan.dark ? 'text-white font-extrabold text-xl mb-4' : 'text-gray-900 font-extrabold text-xl mb-4'">{{ plan.name }}</h3>
+                <div class="flex items-baseline gap-1">
+                  <span [class]="plan.dark ? 'text-white font-extrabold text-4xl' : 'text-gray-900 font-extrabold text-4xl'">{{ plan.price }}</span>
+                  @if (plan.price !== 'Gratuit' && plan.price !== 'Free' && plan.price !== 'مجاناً') {
+                    <span [class]="plan.dark ? 'text-white/70 text-sm' : 'text-gray-500 text-sm'">DH</span>
+                  }
+                </div>
+                <div [class]="plan.dark ? 'text-white/60 text-xs mt-1' : 'text-gray-400 text-xs mt-1'">{{ plan.priceSub }}</div>
+              </div>
+              <!-- Features list -->
+              <div class="p-6 flex-1 flex flex-col">
+                <ul class="space-y-3 mb-8 flex-1">
+                  @for (feat of plan.features; track $index) {
+                    <li class="flex items-start gap-3 text-sm text-gray-700">
+                      <svg class="h-4 w-4 text-violet-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                      {{ feat }}
+                    </li>
+                  }
+                </ul>
+                <a routerLink="/signup" [class]="plan.ctaClass + ' block text-center py-3 px-6 rounded-xl font-semibold text-sm transition-all'">
+                  {{ plan.cta }}
+                </a>
+              </div>
+            </div>
+          }
+        </div>
+        <p class="text-center text-gray-400 text-sm mt-10">
+          {{ t().pricing.custom }} <a href="#" class="text-violet-600 hover:underline font-medium">{{ t().pricing.customLink }}</a>
+        </p>
+      </div>
+    </section>
+
+    <!-- ── Final CTA ── -->
+    <section class="py-24 bg-gradient-to-br from-violet-700 via-violet-600 to-blue-700 relative overflow-hidden">
+      <svg class="zellige-pattern" style="opacity:0.08" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <pattern id="zellige-cta" x="0" y="0" width="60" height="60" patternUnits="userSpaceOnUse">
+            <path d="M30 0 L60 30 L30 60 L0 30 Z" fill="none" stroke="#fff" stroke-width="0.8"/>
+            <circle cx="30" cy="30" r="3" fill="none" stroke="#fff" stroke-width="0.5"/>
+          </pattern>
+        </defs>
+        <rect width="100%" height="100%" fill="url(#zellige-cta)"/>
+      </svg>
+      <div class="max-w-3xl mx-auto px-6 text-center relative z-10">
+        <div appReveal>
+          <div class="text-amber-400 font-bold text-sm uppercase tracking-widest mb-4">{{ t().finalCta.eyebrow }}</div>
+          <h2 class="text-4xl md:text-5xl font-extrabold text-white mb-6 tracking-tight">{{ t().finalCta.h2 }}</h2>
+          <p class="text-violet-200 text-lg mb-10 leading-relaxed">{{ t().finalCta.sub }}</p>
+          <div class="flex flex-col sm:flex-row gap-4 justify-center">
+            <a routerLink="/signup" class="flex items-center justify-center gap-2 bg-white text-violet-700 font-bold px-8 py-4 rounded-xl text-lg hover:bg-violet-50 transition-all shadow-xl">
+              {{ t().finalCta.primary }}
+              <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+            </a>
+            <button class="flex items-center justify-center gap-2 border border-white/30 text-white font-semibold px-8 py-4 rounded-xl text-lg hover:bg-white/10 transition-all">
+              <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
+              {{ t().finalCta.secondary }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Footer ── -->
+    <footer class="bg-gray-950 text-gray-400 pt-16 pb-8">
+      <div class="max-w-6xl mx-auto px-6">
+        <div class="grid md:grid-cols-4 gap-10 mb-12">
+          <div>
+<img src="/zuwwar-logo-transparent.png" alt="Logo Zuwwar" 
+     style="height: 36px; width: auto;">        <p class="text-gray-500 text-sm leading-relaxed mb-4">{{ t().footer.tagline }}</p>
+            <p class="text-gray-600 text-xs">{{ t().footer.made }}</p>
+          </div>
+          @for (col of t().footer.cols; track $index) {
+            <div>
+              <h5 class="text-white font-semibold text-sm mb-4">{{ col.title }}</h5>
+              <ul class="space-y-2.5">
+                @for (link of col.links; track $index) {
+                  <li><a href="#" class="text-gray-500 text-sm hover:text-gray-300 transition-colors">{{ link }}</a></li>
+                }
+              </ul>
+            </div>
+          }
+        </div>
+        <div class="border-t border-gray-800 pt-8 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-gray-600">
+          <p>© 2025 Zuwwar. Tous droits réservés.</p>
+          <div class="flex items-center gap-6">
+            <a href="#" class="hover:text-gray-400 transition-colors">{{ t().footer.privacy }}</a>
+            <a href="#" class="hover:text-gray-400 transition-colors">{{ t().footer.terms }}</a>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+  </main>
+</div>

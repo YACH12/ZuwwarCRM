@@ -1,0 +1,13 @@
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "4200:80"
+    environment:
+      BACKEND_URL: "http://host.docker.internal:8081"
+      AI_SERVICE_URL: "http://host.docker.internal:8100"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped

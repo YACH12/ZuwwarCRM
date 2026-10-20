@@ -1,0 +1,139 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Variables globales ────────────────────────────────────── */
+:root {
+  /* Tes variables d'origine */
+  --purple: #7C3AED;
+  --purple-light: #8B5CF6;
+  --purple-dark: #6D28D9;
+  --blue: #3B82F6;
+  --gold: #F59E0B;
+  --bg: #F1F5F9; /* Modifié pour correspondre au nouveau gris bleuté */
+  --sidebar-bg: #0F172A;
+  --sidebar-text: #CBD5E1;
+  --sidebar-active: #7C3AED;
+  --white: #FFFFFF;
+  --gray-50: #F9FAFB;
+  --gray-100: #F3F4F6;
+  --gray-200: #E5E7EB;
+  --gray-300: #D1D5DB;
+  --gray-400: #9CA3AF;
+  --gray-500: #6B7280;
+  --gray-600: #4B5563;
+  --gray-700: #374151;
+  --gray-800: #1F2937;
+  --gray-900: #111827;
+  --green: #10B981;
+  --red: #EF4444;
+  --orange: #F97316;
+
+  /* Nouvelles variables de la page Deals (Option 1) */
+  --bg-page:        #F1F5F9; 
+  --bg-surface:     #FFFFFF; 
+  --border:         #E2E8F0; 
+  --text-primary:   #0F172A;
+  --text-secondary: #334155;
+  --text-muted:     #64748B;
+  --accent:         #7C3AED;
+  --accent-2:       #3B82F6;
+  --accent-light:   #EDE9FE;
+  --accent-text:    #5B21B6;
+  --green-bg:       #D1FAE5;
+  --green-text:     #065F46;
+  --yellow-bg:      #FEF3C7;
+  --yellow-text:    #92400E;
+  --red-bg:         #FEE2E2;
+  --red-text:       #991B1B;
+  --red-light:      #FEF2F2;
+
+  /* Alias pour les composants qui utilisaient leurs propres noms (shell, etc.) —
+     evite le cas ou un composant redefinit --accent avec une valeur differente
+     du reste de l app (bug observe : indigo #4F46E5 dans le shell vs violet
+     #7C3AED partout ailleurs). Toute nouvelle page doit utiliser les tokens
+     text-primary, accent et bg-page ci-dessus directement plutot que de
+     recreer des equivalents locaux. */
+  --ink-900: var(--text-primary);
+  --ink-700: var(--text-secondary);
+  --ink-500: var(--text-muted);
+  --ink-400: #94A3B8;
+  --ink-300: #CBD5E1;
+  --line: var(--border);
+  --line-soft: #F1F5F9;
+  --surface: var(--bg-surface);
+  --canvas: var(--bg-page);
+  --accent-soft: var(--accent-light);
+  --accent-soft-ink: var(--accent-text);
+  --success: var(--green);
+  --danger: var(--red);
+}
+
+/* ── Composants partages (utilitaires globaux) ────────────────
+   Une seule definition pour eviter la derive observee : .btn-primary,
+   .modal-overlay, .badge etc. etaient reimplementes par page avec des
+   valeurs differentes a chaque fois. Les styles scopes dun composant
+   restent prioritaires si ce composant redefinit une variante locale
+   (specificite Angular egale ou superieure) — ces classes ne servent donc
+   de filet commun que pour les pages qui ne redefinissent pas deja les
+   leurs. */
+.btn-primary {
+  background: var(--text-primary); color: var(--white);
+  padding: 9px 16px; border-radius: 8px; font-size: 13px; font-weight: 600;
+  border: none; cursor: pointer; font-family: 'Inter', sans-serif; transition: background 0.15s;
+}
+.btn-primary:hover { background: var(--accent-dark, #1F2937); }
+.btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.btn-secondary {
+  background: var(--bg-surface); border: 1px solid var(--border); color: var(--text-secondary);
+  padding: 9px 16px; border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer;
+  font-family: 'Inter', sans-serif; transition: all 0.15s;
+}
+.btn-secondary:hover { background: var(--bg-page); }
+
+.badge {
+  display: inline-flex; align-items: center; padding: 3px 10px;
+  border-radius: 20px; font-size: 11px; font-weight: 600;
+}
+.badge-success { background: var(--green-bg); color: var(--green-text); }
+.badge-warning { background: var(--yellow-bg); color: var(--yellow-text); }
+.badge-danger  { background: var(--red-bg); color: var(--red-text); }
+.badge-neutral { background: var(--gray-100); color: var(--gray-500); }
+.badge-accent  { background: var(--accent-light); color: var(--accent-text); }
+
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(15,23,42,0.45);
+  z-index: 200; display: flex; align-items: center; justify-content: center;
+  backdrop-filter: blur(4px); padding: 16px; box-sizing: border-box;
+}
+.modal-overlay > * { max-width: calc(100vw - 32px); max-height: calc(100vh - 32px); overflow-y: auto; }
+
+.empty-state, .loading-state {
+  text-align: center; padding: 48px 24px; color: var(--text-muted); font-size: 13px;
+}
+
+.spinner {
+  width: 20px; height: 20px; border-radius: 50%;
+  border: 2px solid var(--border); border-top-color: var(--accent);
+  animation: spin 0.7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── Styles globaux CRM (seulement pour /app) ──────────────── */
+html, body {
+  height: 100%;
+  font-family: 'Inter', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  /* ⬇️ On force le fond ici pour écraser Tailwind */
+  background-color: var(--bg-page) !important; 
+  color: var(--text-primary);
+}
+
+a { text-decoration: none; color: inherit; }
+button { cursor: pointer; font-family: inherit; }
+input, textarea, select { font-family: inherit; }
+
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--gray-300); border-radius: 3px; }

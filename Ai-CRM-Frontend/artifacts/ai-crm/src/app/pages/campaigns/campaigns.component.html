@@ -1,0 +1,915 @@
+<div class="cmp-page">
+
+  <!-- ── Header ── -->
+  <div class="cmp-header">
+    <div class="cmp-header-info">
+      <div class="cmp-breadcrumb">
+        <span>{{ t().breadcrumbCrm }}</span>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+        <span>{{ t().breadcrumbCampaigns }}</span>
+      </div>
+      <h1 class="cmp-title">{{ t().title }}</h1>
+      <p class="cmp-subtitle">{{ t().subtitle }}</p>
+    </div>
+    <div class="cmp-header-actions">
+      <button class="cmp-btn-ghost" (click)="ouvrirModalTemplate()">
+        <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+        </svg>
+        {{ t().newTemplate }}
+      </button>
+      <button class="cmp-btn-primary" (click)="showCampaignModal.set(true)">
+        <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+        </svg>
+        {{ t().newCampaign }}
+      </button>
+    </div>
+  </div>
+
+  <!-- ── Toasts ── -->
+  @if (actionSuccess()) {
+    <div class="cmp-alert-success">
+      <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+      </svg>
+      {{ actionSuccess() }}
+    </div>
+  }
+  @if (actionError()) {
+    <div class="cmp-alert-error">
+      <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+      </svg>
+      {{ actionError() }}
+    </div>
+  }
+
+  <!-- ── KPI Cards ── -->
+  <div class="cmp-kpi-row">
+    <div class="cmp-kpi-card">
+      <div class="cmp-kpi-icon kpi-purple">
+        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+        </svg>
+      </div>
+      <div class="cmp-kpi-body">
+        <div class="cmp-kpi-value" style="color:#7C3AED">{{ totalElements() }}</div>
+        <div class="cmp-kpi-label">{{ t().kpi.totalCampaigns }}</div>
+        <div class="cmp-kpi-trend trend-up">{{ t().kpi.totalTrend }}</div>
+      </div>
+    </div>
+
+    <div class="cmp-kpi-card">
+      <div class="cmp-kpi-icon kpi-green">
+        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+        </svg>
+      </div>
+      <div class="cmp-kpi-body">
+        <div class="cmp-kpi-value kpi-val-green">{{ activeCampaigns() }}</div>
+        <div class="cmp-kpi-label">{{ t().kpi.activeNow }}</div>
+        <div class="cmp-kpi-trend">{{ t().kpi.activeSub }}</div>
+      </div>
+    </div>
+
+    <div class="cmp-kpi-card">
+      <div class="cmp-kpi-icon kpi-blue">
+        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+        </svg>
+      </div>
+      <div class="cmp-kpi-body">
+        <div class="cmp-kpi-value kpi-val-blue">{{ totalSent() }}</div>
+        <div class="cmp-kpi-label">{{ t().kpi.totalSent }}</div>
+        <div class="cmp-kpi-trend">{{ t().kpi.totalSentSub }}</div>
+      </div>
+    </div>
+
+    <div class="cmp-kpi-card">
+      <div class="cmp-kpi-icon kpi-amber">
+        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+        </svg>
+      </div>
+      <div class="cmp-kpi-body">
+        <div class="cmp-kpi-value kpi-val-amber">{{ avgOpenRate() }}<span class="kpi-unit">%</span></div>
+        <div class="cmp-kpi-label">{{ t().kpi.avgOpenRate }}</div>
+        <div class="cmp-kpi-trend">{{ t().kpi.avgOpenRateSub }}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Tabs ── -->
+  <div class="cmp-tabs-bar">
+    <div class="cmp-tabs">
+      <button class="cmp-tab" [class.active]="activeTab() === 'campaigns'" (click)="activeTab.set('campaigns')">
+        <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+        </svg>
+        {{ t().tabs.campaigns }}
+        <span class="cmp-tab-count">{{ totalElements() }}</span>
+      </button>
+      <button class="cmp-tab" [class.active]="activeTab() === 'templates'" (click)="activeTab.set('templates')">
+        <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"/>
+        </svg>
+        {{ t().tabs.templates }}
+        <span class="cmp-tab-count">{{ templateTotalElements() }}</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ══════════════════ CAMPAIGNS TAB ══════════════════ -->
+  @if (activeTab() === 'campaigns') {
+
+    <!-- Toolbar -->
+    <div class="cmp-toolbar">
+      <div class="cmp-filters">
+        @for (tf of typeFilters; track tf) {
+          <button class="cmp-filter-btn" [class.active]="typeFilter() === tf" (click)="setFilter(tf)">{{ typeFilterLabel(tf) }}</button>
+        }
+      </div>
+      <span class="cmp-total-badge">
+        <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10"/></svg>
+        {{ totalElements() }} {{ t().toolbar.campaignsBadge }}
+      </span>
+    </div>
+
+    <div class="cmp-table-card">
+      <div class="cmp-table-wrap">
+        <table class="cmp-table">
+          <thead>
+            <tr>
+              <th>{{ t().table.campaign }}</th>
+              <th>{{ t().table.type }}</th>
+              <th>{{ t().table.template }}</th>
+              <th>{{ t().table.status }}</th>
+              <th class="th-right">{{ t().table.audience }}</th>
+              <th class="th-right">{{ t().table.sent }}</th>
+              <th class="th-right">{{ t().table.openRate }}</th>
+              <th class="th-right">{{ t().table.clickRate }}</th>
+              <th class="th-actions">{{ t().table.actions }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            @if (loading()) {
+              @for (i of [1,2,3,4,5,6]; track i) {
+                <tr class="sk-tr">
+                  <td><div class="sk sk-w55"></div><div class="sk sk-w35" style="margin-top:5px"></div></td>
+                  <td><div class="sk sk-badge"></div></td>
+                  <td><div class="sk sk-w45"></div></td>
+                  <td><div class="sk sk-badge"></div></td>
+                  <td><div class="sk sk-w30" style="margin-left:auto"></div></td>
+                  <td><div class="sk sk-w40" style="margin-left:auto"></div></td>
+                  <td><div class="sk sk-w30" style="margin-left:auto"></div></td>
+                  <td><div class="sk sk-w30" style="margin-left:auto"></div></td>
+                  <td></td>
+                </tr>
+              }
+            }
+
+            @if (!loading()) {
+              @for (c of campaigns(); track c.id) {
+                <tr class="cmp-row">
+                  <td>
+                    <div class="cmp-camp-name">{{ c.name }}</div>
+                    <div class="cmp-camp-subject">{{ c.subject }}</div>
+                  </td>
+                  <td>
+                    <span class="cmp-type-badge" [class]="'type-' + c.type.toLowerCase()">
+                      {{ typeIcon(c.type) }} {{ c.type }}
+                    </span>
+                  </td>
+                  <td class="td-muted">{{ templateLabel(c.template) }}</td>
+                  <td>
+                    <span class="cmp-status-pill">
+                      <span class="cmp-status-dot" [style.background]="statusColor(c.status)"></span>
+                      {{ statusLabel(c.status) }}
+                    </span>
+                  </td>
+                  <td class="td-metric">
+                    <div class="metric-val">{{ c.audience.toLocaleString() }}</div>
+                  </td>
+                  <td class="td-metric">
+                    <div class="metric-val">{{ c.sent.toLocaleString() }}</div>
+                    <div class="metric-bar-track">
+                      <div class="metric-bar-fill"
+                        [style.width.%]="c.audience > 0 ? (c.sent / c.audience * 100) : 0"
+                        style="background:#7C3AED"></div>
+                    </div>
+                  </td>
+                  <td class="td-metric">
+                    @if (c.type === 'Email') {
+                      <div class="metric-val">{{ c.openRate }}%</div>
+                      <div class="metric-bar-track">
+                        <div class="metric-bar-fill"
+                          [style.width.%]="c.openRate"
+                          [style.background]="c.openRate > 40 ? '#10B981' : '#F59E0B'"></div>
+                      </div>
+                    } @else {
+                      <span class="metric-na">—</span>
+                    }
+                  </td>
+                  <td class="td-metric">
+                    @if (c.type === 'Email') {
+                      <div class="metric-val">{{ c.clickRate }}%</div>
+                      <div class="metric-bar-track">
+                        <div class="metric-bar-fill" [style.width.%]="c.clickRate" style="background:#3B82F6"></div>
+                      </div>
+                    } @else {
+                      <span class="metric-na">—</span>
+                    }
+                  </td>
+                  <td class="td-actions-cell">
+                    <div class="cmp-row-actions">
+                      @if (confirmDeleteId() === c.id) {
+                        <div class="cmp-confirm-del">
+                          <span class="cmp-confirm-label">{{ t().actions.confirmDeleteLabel }}</span>
+                          <button class="cmp-confirm-yes" (click)="confirmDelete(c.id)">{{ t().actions.yes }}</button>
+                          <button class="cmp-confirm-no"  (click)="cancelDelete()">{{ t().actions.no }}</button>
+                        </div>
+                      } @else {
+                        <button class="cmp-action-send"
+                          [class.sent]="c.status === 'Completed'"
+                          [disabled]="sending() === c.id || c.status === 'Completed'"
+                          (click)="sendCampaign(c.id)">
+                          @if (sending() === c.id) { <span class="cmp-spin"></span> {{ t().actions.sending }} }
+                          @else if (c.status === 'Completed') { ✓ {{ t().actions.sent }} }
+                          @else { ▶ {{ t().actions.send }} }
+                        </button>
+                        <button class="cmp-action-del" [title]="t().actions.delete" [attr.aria-label]="t().actions.delete"
+                          [disabled]="deleting() === c.id"
+                          (click)="requestDelete(c.id)">
+                          @if (deleting() === c.id) {
+                            <span class="cmp-spin"></span>
+                          } @else {
+                            <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                            </svg>
+                          }
+                        </button>
+                      }
+                    </div>
+                  </td>
+                </tr>
+              }
+
+              @if (!loading() && campaigns().length === 0) {
+                <tr>
+                  <td colspan="9">
+                    <div class="cmp-empty">
+                      <div class="cmp-empty-icon">
+                        <svg width="32" height="32" fill="none" stroke="#CBD5E1" stroke-width="1.5" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                        </svg>
+                      </div>
+                      <p class="cmp-empty-title">{{ t().empty.campaignsTitle }}</p>
+                      <p class="cmp-empty-sub">{{ t().empty.campaignsSub }}</p>
+                      <button class="cmp-btn-primary" (click)="showCampaignModal.set(true)">
+                        <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                        {{ t().newCampaign }}
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              }
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <div class="cmp-pagination">
+        <span class="cmp-page-info">
+          {{ t().pagination.pagePrefix }} <strong>{{ currentPage() + 1 }}</strong> {{ t().pagination.ofSeparator }} {{ totalPages() }} —
+          <strong>{{ totalElements() }}</strong> {{ t().pagination.campaigns }}
+        </span>
+        <div class="cmp-page-nav">
+          <button class="cmp-page-btn" aria-label="Page précédente" (click)="prevPage()" [disabled]="currentPage() === 0">
+            <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+          </button>
+          @for (p of pages(); track p) {
+            <button class="cmp-page-num" [class.active]="currentPage() === p" (click)="goToPage(p)">{{ p + 1 }}</button>
+          }
+          <button class="cmp-page-btn" aria-label="Page suivante" (click)="nextPage()" [disabled]="currentPage() === totalPages() - 1">
+            <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- ══════════════════ TEMPLATES TAB ══════════════════ -->
+  @if (activeTab() === 'templates') {
+
+    <div class="cmp-toolbar">
+      <div class="cmp-filters">
+        @for (tf of typeFilters; track tf) {
+          <button class="cmp-filter-btn" [class.active]="typeFilter() === tf" (click)="typeFilter.set(tf)">{{ typeFilterLabel(tf) }}</button>
+        }
+      </div>
+      <span class="cmp-total-badge">
+        <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+        {{ templateTotalElements() }} {{ t().toolbar.templatesBadge }}
+      </span>
+    </div>
+
+    <div class="cmp-templates-grid">
+      @for (tpl of filteredTemplates(); track tpl.id) {
+        <div class="cmp-tpl-card" (click)="openEditTemplate(tpl)" [title]="t().templateCard.clickToEdit">
+
+          <!-- Hero coloré par canal -->
+          <div class="cmp-tpl-hero"
+               [class.tpl-hero-email]="tpl.type === 'Email'"
+               [class.tpl-hero-sms]="tpl.type === 'SMS'"
+               [class.tpl-hero-wa]="tpl.type === 'WhatsApp'">
+            <div class="cmp-tpl-hero-icon">{{ typeIcon(tpl.type) }}</div>
+            <div class="cmp-tpl-hero-deco-a"></div>
+            <div class="cmp-tpl-hero-deco-b"></div>
+
+            <!-- Suppression — dans le coin, ne déclenche pas l'édition -->
+            <div class="cmp-tpl-corner-actions" (click)="$event.stopPropagation()">
+              @if (confirmDeleteTplId() === tpl.id) {
+                <div class="cmp-tpl-confirm-del">
+                  <span class="cmp-confirm-label">{{ t().actions.confirmDeleteLabel }}</span>
+                  <button class="cmp-confirm-yes" (click)="confirmDeleteTpl(tpl.id)">{{ t().actions.yes }}</button>
+                  <button class="cmp-confirm-no"  (click)="cancelDeleteTpl()">{{ t().actions.no }}</button>
+                </div>
+              } @else {
+                <button class="cmp-tpl-del-btn" [title]="t().actions.delete" [attr.aria-label]="t().actions.delete"
+                  [disabled]="deletingTpl() === tpl.id"
+                  (click)="requestDeleteTpl(tpl.id)">
+                  @if (deletingTpl() === tpl.id) {
+                    <span class="cmp-spin"></span>
+                  } @else {
+                    <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                    </svg>
+                  }
+                </button>
+              }
+            </div>
+          </div>
+
+          <!-- Corps de la carte -->
+          <div class="cmp-tpl-body">
+
+            <!-- Badges : canal + catégorie -->
+            <div class="cmp-tpl-badges">
+              <span class="cmp-tpl-channel-badge"
+                    [class.badge-email]="tpl.type === 'Email'"
+                    [class.badge-sms]="tpl.type === 'SMS'"
+                    [class.badge-wa]="tpl.type === 'WhatsApp'">
+                {{ tpl.type }}
+              </span>
+              @if (tpl.category) {
+                <span class="cmp-tpl-cat-badge">{{ tpl.category }}</span>
+              }
+            </div>
+
+            <!-- Nom -->
+            <div class="cmp-tpl-name">{{ templateNameLabel(tpl.name) }}</div>
+
+            <!-- Sujet / aperçu -->
+            @if (tpl.subject) {
+              <div class="cmp-tpl-subject">{{ tpl.subject }}</div>
+            }
+
+            <!-- Lignes de prévisualisation simulées -->
+            <div class="cmp-tpl-preview-lines"
+                 [class.preview-email]="tpl.type === 'Email'"
+                 [class.preview-sms]="tpl.type === 'SMS'"
+                 [class.preview-wa]="tpl.type === 'WhatsApp'">
+              <div class="cmp-tpl-pl cmp-tpl-pl--90"></div>
+              <div class="cmp-tpl-pl cmp-tpl-pl--75"></div>
+              <div class="cmp-tpl-pl cmp-tpl-pl--55"></div>
+            </div>
+
+            <!-- Footer -->
+            <div class="cmp-tpl-footer">
+              <div class="cmp-tpl-usage">
+                <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                </svg>
+                <strong>{{ tpl.usedIn }}</strong> {{ tpl.usedIn !== 1 ? t().templateCard.campaignCountPlural : t().templateCard.campaignCountSingular }}
+              </div>
+              <button class="cmp-btn-use"
+                      [class.btn-use-email]="tpl.type === 'Email'"
+                      [class.btn-use-sms]="tpl.type === 'SMS'"
+                      [class.btn-use-wa]="tpl.type === 'WhatsApp'"
+                      (click)="useTemplate(tpl); $event.stopPropagation()">
+                {{ t().templateCard.use }}
+                <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      }
+
+      @if (filteredTemplates().length === 0) {
+        <div class="cmp-tpl-empty">
+          <div class="cmp-tpl-empty-icon">
+            <svg width="28" height="28" fill="none" stroke="#CBD5E1" stroke-width="1.5" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+            </svg>
+          </div>
+          <p class="cmp-tpl-empty-title">{{ t().empty.templatesTitle }}</p>
+          <p class="cmp-tpl-empty-sub">{{ t().empty.templatesSub }}</p>
+          <button class="cmp-btn-primary" (click)="ouvrirModalTemplate()">
+            <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/>
+            </svg>
+            {{ t().newTemplate }}
+          </button>
+        </div>
+      }
+    </div>
+
+    <div class="cmp-pagination cmp-pagination--standalone">
+      <span class="cmp-page-info">
+        {{ t().pagination.pagePrefix }} <strong>{{ templatePage() + 1 }}</strong> {{ t().pagination.ofSeparator }} {{ templateTotalPages() }} —
+        <strong>{{ templateTotalElements() }}</strong> {{ t().pagination.templates }}
+      </span>
+      <div class="cmp-page-nav">
+        <button class="cmp-page-btn" aria-label="Page précédente" (click)="prevTemplatePage()" [disabled]="templatePage() === 0">
+          <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+        </button>
+        <button class="cmp-page-btn" aria-label="Page suivante" (click)="nextTemplatePage()" [disabled]="templatePage() === templateTotalPages() - 1">
+          <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+        </button>
+      </div>
+    </div>
+  }
+
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     CAMPAIGN MODAL
+══════════════════════════════════════════════════════ -->
+@if (showCampaignModal()) {
+  <div class="cmp-overlay" (click)="showCampaignModal.set(false)" (keydown.escape)="showCampaignModal.set(false)">
+    <div class="cmp-modal cmp-modal-lg" role="dialog" aria-modal="true" [attr.aria-label]="t().campaignModal.title" (click)="$event.stopPropagation()">
+
+      <div class="cmp-modal-hd">
+        <div class="cmp-modal-hd-left">
+          <div class="cmp-modal-icon">
+            <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+            </svg>
+          </div>
+          <div>
+            <div class="cmp-modal-title">{{ t().campaignModal.title }}</div>
+            <div class="cmp-modal-sub">{{ t().campaignModal.subtitle }}</div>
+          </div>
+        </div>
+        <button class="cmp-modal-close" aria-label="Fermer" (click)="showCampaignModal.set(false); campStep.set(1)">
+          <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Steps bar -->
+      <div class="cmp-steps-bar">
+        <div class="cmp-step" [class.active]="campStep() >= 1" [class.done]="campStep() > 1">
+          <div class="cmp-step-num">
+            @if (campStep() > 1) {
+              <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+            } @else { 1 }
+          </div>
+          <div class="cmp-step-label">{{ t().campaignModal.steps.information }}</div>
+        </div>
+        <div class="cmp-step-line" [class.done]="campStep() > 1"></div>
+        <div class="cmp-step" [class.active]="campStep() >= 2" [class.done]="campStep() > 2">
+          <div class="cmp-step-num">
+            @if (campStep() > 2) {
+              <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+            } @else { 2 }
+          </div>
+          <div class="cmp-step-label">{{ t().campaignModal.steps.contacts }}</div>
+        </div>
+        <div class="cmp-step-line" [class.done]="campStep() > 2"></div>
+        <div class="cmp-step" [class.active]="campStep() >= 3">
+          <div class="cmp-step-num">3</div>
+          <div class="cmp-step-label">{{ t().campaignModal.steps.confirmation }}</div>
+        </div>
+      </div>
+
+      <!-- Step 1 -->
+      @if (campStep() === 1) {
+        <div class="cmp-step-body">
+          <div class="cmp-field">
+            <label>{{ t().campaignModal.step1.campaignName }} <span class="cmp-req">*</span></label>
+            <input type="text" [ngModel]="newCamp().name" (ngModelChange)="updateCampName($event)" [placeholder]="t().campaignModal.step1.campaignNamePlaceholder"/>
+          </div>
+          <div class="cmp-field">
+            <label>{{ t().campaignModal.step1.channel }}</label>
+            <div class="cmp-channel-grid">
+              @for (ch of channels(); track ch.value) {
+                <div class="cmp-channel-opt" [class.selected]="newCamp().type === ch.value" (click)="changeChannel(ch.value)">
+                  <span class="cmp-ch-icon">{{ ch.icon }}</span>
+                  <span>{{ ch.label }}</span>
+                </div>
+              }
+            </div>
+          </div>
+          <div class="cmp-field">
+            <label>{{ t().campaignModal.step1.subjectLine }} <span class="cmp-req">*</span></label>
+            <input type="text" [ngModel]="newCamp().subject" (ngModelChange)="updateCampSubject($event)" [placeholder]="t().campaignModal.step1.subjectLinePlaceholder"/>
+          </div>
+          <div class="cmp-field">
+            <label>{{ t().campaignModal.step1.chooseTemplate }}</label>
+            <div class="cmp-tpl-select-grid">
+              @for (tpl of templatesByType(); track tpl.id) {
+                <div class="cmp-tpl-opt" [class.selected]="newCamp().templateId === tpl.id" (click)="updateTemplateId(tpl.id)">
+                  <div class="cmp-tpl-opt-name">{{ templateNameLabel(tpl.name) }}</div>
+                  <div class="cmp-tpl-opt-cat">{{ tpl.category }}</div>
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+        <div class="cmp-modal-ft">
+          <button class="cmp-btn-ghost" (click)="showCampaignModal.set(false)">{{ t().campaignModal.step1.cancel }}</button>
+          <button class="cmp-btn-primary" [disabled]="!newCamp().name || !newCamp().subject" (click)="campStep.set(2)">
+            {{ t().campaignModal.step1.next }}
+            <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+          </button>
+        </div>
+      }
+
+      <!-- Step 2 -->
+      @if (campStep() === 2) {
+        <div class="cmp-step-body">
+          <div class="cmp-contacts-hd">
+            <span class="cmp-contacts-count"><strong>{{ selectedContactIds().length }}</strong> {{ t().campaignModal.step2.selected }}</span>
+            <div style="display:flex;gap:8px">
+              <button class="cmp-btn-ghost cmp-btn-sm" (click)="selectAll()">{{ t().campaignModal.step2.selectAll }}</button>
+              <button class="cmp-btn-ghost cmp-btn-sm" (click)="deselectAll()">{{ t().campaignModal.step2.clear }}</button>
+            </div>
+          </div>
+          <div class="cmp-contacts-list">
+            @for (c of allContactsList(); track c.id) {
+              <div class="cmp-contact-row" [class.selected]="isSelected(c.id!)" (click)="toggleContact(c.id!)">
+                <div class="cmp-contact-check" [class.checked]="isSelected(c.id!)">
+                  @if (isSelected(c.id!)) {
+                    <svg width="10" height="10" fill="none" stroke="white" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
+                    </svg>
+                  }
+                </div>
+                <div class="cmp-contact-avatar">{{ c.nom[0] }}{{ c.prenom[0] }}</div>
+                <div class="cmp-contact-info">
+                  <div class="cmp-contact-name">{{ c.prenom }} {{ c.nom }}</div>
+                  <div class="cmp-contact-email">{{ c.email }}</div>
+                </div>
+                <span class="cmp-score-pill"
+                  [class.score-high]="c.scoreEngagement > 70"
+                  [class.score-mid]="c.scoreEngagement > 40 && c.scoreEngagement <= 70"
+                  [class.score-low]="c.scoreEngagement <= 40">
+                  {{ c.scoreEngagement | number:'1.0-0' }}
+                </span>
+                <span class="cmp-status-mini">{{ c.status }}</span>
+              </div>
+            }
+          </div>
+        </div>
+        <div class="cmp-modal-ft">
+          <button class="cmp-btn-ghost" (click)="campStep.set(1)">
+            <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+            {{ t().campaignModal.step2.back }}
+          </button>
+          <button class="cmp-btn-primary" [disabled]="selectedContactIds().length === 0" (click)="campStep.set(3)">
+            {{ t().campaignModal.step2.review }} ({{ selectedContactIds().length }})
+            <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+          </button>
+        </div>
+      }
+
+      <!-- Step 3 -->
+      @if (campStep() === 3) {
+        <div class="cmp-step-body">
+          <div class="cmp-review-card">
+            <div class="cmp-review-title">
+              <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+              {{ t().campaignModal.step3.summaryTitle }}
+            </div>
+            <div class="cmp-review-row"><span>{{ t().campaignModal.step3.name }}</span><strong>{{ newCamp().name }}</strong></div>
+            <div class="cmp-review-row"><span>{{ t().campaignModal.step3.subject }}</span><strong>{{ newCamp().subject }}</strong></div>
+            <div class="cmp-review-row"><span>{{ t().campaignModal.step3.channel }}</span><strong>{{ newCamp().type }}</strong></div>
+            <div class="cmp-review-row"><span>{{ t().campaignModal.step3.template }}</span><strong>{{ templateLabel(newCamp().templateName) }}</strong></div>
+            <div class="cmp-review-row">
+              <span>{{ t().campaignModal.step3.recipients }}</span>
+              <strong class="cmp-review-recipients">{{ selectedContactIds().length }} {{ t().campaignModal.step3.recipientsUnit }}</strong>
+            </div>
+          </div>
+          <div class="cmp-review-note">
+            <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            {{ t().campaignModal.step3.note.replace('{count}', selectedContactIds().length.toString()) }}
+          </div>
+        </div>
+        <div class="cmp-modal-ft">
+          <button class="cmp-btn-ghost" (click)="campStep.set(2)">
+            <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+            {{ t().campaignModal.step3.back }}
+          </button>
+          <button class="cmp-btn-primary" (click)="createCampaign()">
+            <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
+            {{ t().campaignModal.step3.createAndSend }}
+          </button>
+        </div>
+      }
+    </div>
+  </div>
+}
+
+
+<!-- ══════════════════════════════════════════════════════
+     TEMPLATE MODAL
+══════════════════════════════════════════════════════ -->
+@if (showTemplateModal()) {
+  <div class="cmp-overlay" (click)="showTemplateModal.set(false)" (keydown.escape)="showTemplateModal.set(false)">
+    <div class="tpl-modal" role="dialog" aria-modal="true" [attr.aria-label]="editingTplId() ? t().templateModal.editTitle : t().templateModal.title" (click)="$event.stopPropagation()">
+
+      <!-- ── Header ── -->
+      <div class="tpl-modal-header">
+        <div class="tpl-modal-header-left">
+          <div class="tpl-modal-icon">
+            <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+            </svg>
+          </div>
+          <div>
+            <div class="tpl-modal-title">{{ editingTplId() ? t().templateModal.editTitle : t().templateModal.title }}</div>
+            <div class="tpl-modal-sub">{{ editingTplId() ? t().templateModal.editSubtitle : t().templateModal.subtitle }}</div>
+          </div>
+        </div>
+        <button class="cmp-modal-close" aria-label="Fermer" (click)="showTemplateModal.set(false)" [disabled]="savingTpl()">
+          <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- ── Body: 2 colonnes ── -->
+      <div class="tpl-modal-body">
+
+        <!-- Colonne gauche : informations -->
+        <div class="tpl-col-info">
+
+          <!-- Section : Détails -->
+          <div class="tpl-info-section">
+            <div class="tpl-section-label">
+              <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+              {{ t().templateModal.details }}
+            </div>
+
+            <div class="tpl-field">
+              <label>{{ t().templateModal.name }} <span class="tpl-req">*</span></label>
+              <input type="text"
+                [value]="newTpl.name"
+                (input)="onTplNameChange($any($event.target).value)"
+                [placeholder]="t().templateModal.namePlaceholder"
+                [class.tpl-input-error]="tplNameError()"/>
+              @if (tplNameError()) {
+                <div class="tpl-field-error">{{ t().templateModal.nameRequired }}</div>
+              }
+            </div>
+
+            <div class="tpl-field">
+              <label>{{ t().templateModal.channel }}</label>
+              <div class="tpl-channel-grid">
+                @for (ch of channels(); track ch.value) {
+                  <div class="tpl-channel-opt"
+                       [class.selected]="newTpl.type === ch.value"
+                       [class.opt-email]="ch.value === 'Email'"
+                       [class.opt-sms]="ch.value === 'SMS'"
+                       [class.opt-wa]="ch.value === 'WhatsApp'"
+                       (click)="newTpl.type = ch.value">
+                    <span class="tpl-ch-icon">{{ ch.icon }}</span>
+                    <span class="tpl-ch-label">{{ ch.label }}</span>
+                  </div>
+                }
+              </div>
+            </div>
+
+            <div class="tpl-field">
+              <label>{{ t().templateModal.category }}</label>
+              <div class="tpl-select-wrap">
+                <select [(ngModel)]="newTpl.category">
+                  <option value="Onboarding">{{ t().templateModal.categories.onboarding }}</option>
+                  <option value="Promotion">{{ t().templateModal.categories.promotion }}</option>
+                  <option value="Follow-up">{{ t().templateModal.categories.followUp }}</option>
+                  <option value="Newsletter">{{ t().templateModal.categories.newsletter }}</option>
+                  <option value="Re-engagement">{{ t().templateModal.categories.reEngagement }}</option>
+                  <option value="Transactional">{{ t().templateModal.categories.transactional }}</option>
+                </select>
+                <svg class="tpl-select-arrow" width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                </svg>
+              </div>
+            </div>
+
+            <div class="tpl-field">
+              <label>{{ t().templateModal.subjectLine }}</label>
+              <input type="text" [(ngModel)]="newTpl.subject" [placeholder]="t().templateModal.subjectLinePlaceholder"/>
+              @if (newTpl.subject) {
+                <div class="tpl-char-count">{{ newTpl.subject.length }} {{ t().templateModal.chars }}</div>
+              }
+            </div>
+          </div>
+
+          <!-- Section : Variables -->
+          <div class="tpl-info-section tpl-vars-section">
+            <div class="tpl-section-label">
+              <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"/>
+              </svg>
+              {{ t().templateModal.variables }}
+              <span class="tpl-vars-hint">{{ t().templateModal.variablesHint }}</span>
+            </div>
+            <div class="tpl-vars-grid">
+              @for (v of variablesDisponibles(); track v.code) {
+                <button class="tpl-var-chip" (click)="insererVariable(v.code)" [title]="t().templateModal.variablesTitlePrefix + v.exemple">
+                  {{ v.code }}
+                </button>
+              }
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Colonne droite : éditeur -->
+        <div class="tpl-col-editor">
+
+          <!-- Tabs de mode -->
+          <div class="tpl-editor-tabs">
+            <button [class.active]="editorMode() === 'texte'" (click)="changerModeEditeur('texte')">
+              <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"/>
+              </svg>
+              {{ t().templateModal.editor.plainText }}
+            </button>
+            <button [class.active]="editorMode() === 'html'" (click)="changerModeEditeur('html')">
+              <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/>
+              </svg>
+              {{ t().templateModal.editor.htmlPreview }}
+            </button>
+            <button [class.active]="editorMode() === 'visuel'" (click)="changerModeEditeur('visuel')">
+              <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
+              </svg>
+              {{ t().templateModal.editor.visualEditor }}
+            </button>
+          </div>
+
+          @if (tplBodyError()) {
+            <div class="tpl-field-error tpl-field-error--editor">{{ t().templateModal.bodyRequired }}</div>
+          }
+
+          <!-- Mode : Plain text -->
+          @if (editorMode() === 'texte') {
+            <div class="tpl-editor-wrap">
+              <textarea
+                id="editorTextarea"
+                class="tpl-textarea"
+                [(ngModel)]="newTpl.body"
+                [placeholder]="t().templateModal.textPlaceholder"
+                rows="14">
+              </textarea>
+              <div class="tpl-editor-hint">
+                <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                {{ t().templateModal.textHint }}
+              </div>
+            </div>
+          }
+
+          <!-- Mode : HTML -->
+          @if (editorMode() === 'html') {
+            <div class="tpl-editor-wrap">
+              <div class="tpl-pane-label">
+                <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/>
+                </svg>
+                {{ t().templateModal.htmlSource }}
+                <div class="tpl-pane-actions">
+                  <button type="button" class="tpl-icon-btn" (click)="htmlImageInput.click()" [title]="t().templateModal.insertImage" [attr.aria-label]="t().templateModal.insertImage">
+                    <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <rect x="3" y="3" width="18" height="18" rx="2"/>
+                      <circle cx="8.5" cy="8.5" r="1.5"/>
+                      <path d="M21 15l-5-5L5 21"/>
+                    </svg>
+                  </button>
+                  <input #htmlImageInput type="file" accept="image/*" style="display:none" (change)="onImageFileSelected($event)"/>
+                  <button type="button" class="tpl-preview-btn" (click)="genererApercu()">
+                    <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0zM2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                    </svg>
+                    {{ t().templateModal.generatePreview }}
+                  </button>
+                </div>
+              </div>
+              <textarea
+                id="editorTextarea"
+                class="tpl-textarea tpl-code"
+                [(ngModel)]="newTpl.body"
+                [placeholder]="t().templateModal.htmlPlaceholder"
+                rows="16"
+                spellcheck="false">
+              </textarea>
+              <div class="tpl-editor-hint">
+                <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                {{ t().templateModal.htmlHint }}
+              </div>
+            </div>
+          }
+
+          <!-- Mode : Visual (Tiptap) -->
+          @if (editorMode() === 'visuel') {
+            <div class="tpl-editor-wrap">
+              <app-tiptap-editor
+                #tiptapEditor
+                [content]="newTpl.body"
+                [placeholder]="t().templateModal.visualPlaceholder"
+                (contentChange)="newTpl.body = $event">
+              </app-tiptap-editor>
+              <div class="tpl-editor-hint">
+                <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                {{ t().templateModal.visualHint }}
+              </div>
+            </div>
+          }
+
+        </div>
+      </div>
+
+      <!-- ── Footer ── -->
+      <div class="tpl-modal-footer">
+        @if (tplError()) {
+          <div class="tpl-save-error">
+            <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            {{ tplError() }}
+          </div>
+        }
+        <div class="tpl-footer-actions">
+          <button class="cmp-btn-ghost" (click)="showTemplateModal.set(false)" [disabled]="savingTpl()">
+            {{ t().templateModal.cancel }}
+          </button>
+          <button class="cmp-btn-primary" [disabled]="savingTpl()" (click)="saveTemplate()">
+            @if (savingTpl()) {
+              <span class="cmp-spin"></span>
+              {{ editingTplId() ? t().templateModal.updating : t().templateModal.saving }}
+            } @else {
+              <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+              </svg>
+              {{ editingTplId() ? t().templateModal.update : t().templateModal.save }}
+            }
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+}
+
+<!-- ── Modal : aperçu du template HTML ── -->
+@if (previewModalOpen()) {
+  <div class="cmp-overlay" (click)="fermerApercu()" (keydown.escape)="fermerApercu()">
+    <div class="tpl-preview-modal" role="dialog" aria-modal="true" [attr.aria-label]="t().templateModal.livePreview" (click)="$event.stopPropagation()">
+      <div class="tpl-preview-modal-header">
+        <div class="tpl-preview-modal-title">
+          <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0zM2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+          </svg>
+          {{ t().templateModal.livePreview }}
+          <span class="tpl-test-badge">{{ t().templateModal.testData }}</span>
+        </div>
+        <button class="cmp-modal-close" aria-label="Fermer" (click)="fermerApercu()">
+          <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+      <iframe class="tpl-preview-modal-frame" [srcdoc]="safePreviewDoc()" sandbox="allow-same-origin"></iframe>
+    </div>
+  </div>
+}

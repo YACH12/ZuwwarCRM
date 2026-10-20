@@ -1,0 +1,209 @@
+* { 
+    box-sizing: border-box; 
+    margin: 0; 
+    padding: 0; 
+}
+
+body {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #f5f3ff 0%, #ffffff 50%, #fffbeb 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Segoe UI', sans-serif;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Taches de couleur décoratives, en écho au site principal */
+.zuwwar-orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(60px);
+    pointer-events: none;
+    z-index: 0;
+}
+.zuwwar-orb-a {
+    width: 420px; height: 420px;
+    top: -120px; right: -120px;
+    background: radial-gradient(circle, rgba(124, 58, 237, 0.18) 0%, transparent 70%);
+}
+.zuwwar-orb-b {
+    width: 320px; height: 320px;
+    bottom: -100px; left: -100px;
+    background: radial-gradient(circle, rgba(245, 158, 11, 0.15) 0%, transparent 70%);
+}
+
+.zuwwar-card {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 380px;
+    background: white;
+    border-radius: 20px;
+    padding: 40px 36px;
+    box-shadow: 0 20px 60px rgba(124, 58, 237, 0.15);
+    border: 1px solid rgba(124, 58, 237, 0.1);
+    animation: zuwwarCardIn 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes zuwwarCardIn {
+    0%   { opacity: 0; transform: translateY(14px); }
+    100% { opacity: 1; transform: translateY(0); }
+}
+
+.zuwwar-logo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+    justify-content: center;
+}
+
+.logo-text {
+    font-size: 28px;
+    font-weight: 800;
+    background: linear-gradient(135deg, #7C3AED, #3B82F6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.zuwwar-subtitle {
+    text-align: center;
+    color: #6B7280;
+    font-size: 13px;
+    margin-bottom: 28px;
+}
+
+.zuwwar-error {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    background: rgba(239, 68, 68, 0.08);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    color: #DC2626;
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    line-height: 1.5;
+    margin-bottom: 16px;
+    text-align: left;
+}
+
+.zuwwar-error-icon {
+    flex-shrink: 0;
+    margin-top: 1px;
+}
+
+.form_main {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.inputContainer {
+    width: 100%;
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.inputIcon {
+    position: absolute;
+    left: 12px;
+    z-index: 1;
+    pointer-events: none; /* L'icône ne bloque plus jamais le clic de la souris */
+}
+
+.inputField {
+    width: 100%;
+    height: 44px;
+    background-color: #F9FAFB;
+    border: 1.5px solid #E5E7EB;
+    border-radius: 10px;
+    color: #111827;
+    font-size: 14px;
+    font-weight: 500;
+    padding-left: 38px; /* Ajusté pour laisser l'icône respirer sans chevauchement */
+    padding-right: 12px;
+    transition: border-color 0.15s, background-color 0.15s;
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+.inputField:focus {
+    outline: none;
+    border-color: #7C3AED;
+    background: white;
+}
+
+.inputField::placeholder {
+    color: #9CA3AF;
+    font-size: 13px;
+}
+
+.zuwwar-submit {
+    width: 100%;
+    height: 44px;
+    background: linear-gradient(135deg, #7C3AED 0%, #4F46E5 50%, #7C3AED 100%);
+    background-size: 200% 200%;
+    border: none;
+    border-radius: 10px;
+    color: white;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 8px;
+    transition: background-position 0.5s ease, transform 0.15s ease, box-shadow 0.2s ease;
+}
+
+.zuwwar-submit:hover {
+    background-position: 100% 50%;
+    transform: translateY(-1px);
+    box-shadow: 0 10px 25px rgba(124, 58, 237, 0.3);
+}
+.zuwwar-submit:active {
+    transform: translateY(0);
+}
+
+.forgotLink {
+    font-size: 12px;
+    color: #7C3AED;
+    text-decoration: none;
+    text-align: center;
+    display: block;
+    margin-top: 10px;
+    font-weight: 600;
+}
+
+.forgotLink:hover {
+    text-decoration: underline;
+}
+
+.zuwwar-register {
+    margin-top: 20px;
+    text-align: center;
+    font-size: 13px;
+    color: #6B7280;
+}
+
+.zuwwar-register a {
+    color: #7C3AED;
+    font-weight: 700;
+    text-decoration: none;
+    margin-left: 4px;
+}
+
+.zuwwar-register a:hover {
+    text-decoration: underline;
+}
+
+.zuwwar-footer {
+    margin-top: 20px;
+    text-align: center;
+    font-size: 11px;
+    color: #9CA3AF;
+    border-top: 1px solid #F3F4F6;
+    padding-top: 16px;
+}

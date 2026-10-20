@@ -1,0 +1,741 @@
+<div class="dashboard">
+
+  <!-- ── Welcome header (sobre, plus de bandeau dégradé) ── -->
+  <div class="welcome-banner">
+    <div class="welcome-left">
+      <div class="welcome-greeting">{{ greeting() }}</div>
+      <div class="welcome-name">{{ username() }}</div>
+      <div class="welcome-date">{{ today() }}</div>
+    </div>
+    <div class="welcome-actions">
+      <a routerLink="/app/contacts" class="btn-action primary-solid">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        {{ t().banner.newContact }}
+      </a>
+      <a routerLink="/app/deals" class="btn-action">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        {{ t().banner.newDeal }}
+      </a>
+    </div>
+  </div>
+
+  <div class="dash-content">
+
+    <!-- ── KPI Cards — carte plate, icône neutre, accent réservé au delta ── -->
+    <section class="kpi-grid">
+      @for (s of stats(); track s.label) {
+        <div class="kpi-card" [class.revealed]="revealed()">
+          <div class="kpi-top">
+            <div class="kpi-icon">
+              @switch (s.icon) {
+                @case ('users') {
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+                }
+                @case ('briefcase') {
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg>
+                }
+                @case ('trophy') {
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="8 6 4 6 4 18"/><polyline points="16 6 20 6 20 18"/><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M8 18v2H6M16 18v2h2M4 18h16"/></svg>
+                }
+                @case ('cpu') {
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="14" x2="23" y2="14"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="14" x2="4" y2="14"/></svg>
+                }
+              }
+            </div>
+            <span class="kpi-trend"
+              [class.up]="s.trend === 'up'"
+              [class.down]="s.trend === 'down'"
+              [class.neutral]="s.trend === 'neutral'">
+              @if (s.trend === 'up') {
+                <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="18 15 12 9 6 15"/></svg>
+              }
+              @if (s.trend === 'down') {
+                <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+              }
+              {{ s.delta }}
+            </span>
+          </div>
+          <div class="kpi-bottom">
+            <div class="kpi-value-col">
+              <div class="kpi-value">{{ s.value }}</div>
+              <div class="kpi-label">{{ s.label }}</div>
+            </div>
+            @if (s.sparkline) {
+              <svg class="kpi-spark" [class.revealed]="revealed()" width="68" height="26" viewBox="0 0 68 26" preserveAspectRatio="none">
+                <path [attr.d]="s.sparkline" fill="none" [attr.stroke]="s.color" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            }
+          </div>
+        </div>
+      }
+    </section>
+
+    <!-- ── Tendances — courbe / aire / histogramme, données réelles sur la période sélectionnée ── -->
+    <div class="trends-section-header">
+      <span class="trends-section-title">{{ t().trends.sectionTitle }}</span>
+      <div class="period-pills">
+        @for (n of trendMonthOptions; track n) {
+          <button type="button" class="period-pill" [class.active]="trendMonths() === n" (click)="setTrendMonths(n)">
+            {{ n }}{{ t().trends.monthsSuffix }}
+          </button>
+        }
+      </div>
+    </div>
+
+    <section class="trends-row" [class.revealed]="revealed()">
+
+      <!-- Courbe : nouveaux contacts par mois -->
+      <div class="card trend-card">
+        <div class="card-header">
+          <div class="card-title">
+            <div class="card-title-icon">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 17 9 11 13 15 21 6"/><polyline points="14 6 21 6 21 13"/></svg>
+            </div>
+            {{ t().trends.newContacts }}
+          </div>
+          <span class="card-meta">{{ contactsTotal() }} · {{ periodLabel() }}</span>
+        </div>
+        <div class="card-body">
+          @if (loading()) {
+            <div class="skeleton-list"><div class="skeleton-row" style="height:100px"></div></div>
+          } @else if (contactsTotal() === 0) {
+            <div class="empty-state">{{ t().trends.noData }}</div>
+          } @else {
+            <div class="zoom-wrap"
+                 [class.zoomed]="isZoomed('contacts')"
+                 (wheel)="onZoomWheel($event, 'contacts')"
+                 (mousedown)="onZoomPanStart($event, 'contacts')"
+                 (mousemove)="onZoomPanMove($event, 'contacts')"
+                 (mouseup)="onZoomPanEnd('contacts')"
+                 (mouseleave)="onZoomPanEnd('contacts')"
+                 (dblclick)="resetZoom('contacts')">
+              @if (isZoomed('contacts')) {
+                <button type="button" class="zoom-reset" (click)="resetZoom('contacts', $event)">
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M21 12a9 9 0 11-3-6.7"/><polyline points="21 3 21 9 15 9"/></svg>
+                  Réinitialiser
+                </button>
+              }
+              <div class="zoom-content" [style]="zoomStyle('contacts')">
+                <svg class="trend-svg" [class.revealed]="revealed()" [attr.viewBox]="'0 0 ' + chartW + ' ' + chartH" preserveAspectRatio="none">
+                  <line [attr.x1]="6" [attr.y1]="chartBaseline" [attr.x2]="chartW - 6" [attr.y2]="chartBaseline" class="trend-axis"/>
+                  <path class="trend-line" [attr.d]="contactsLinePath()" fill="none" stroke="#7C3AED" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" pathLength="1"/>
+                  @for (p of newContactsTrend(); track p.label; let i = $index) {
+                    <circle class="trend-dot" [attr.cx]="p.x" [attr.cy]="p.y" r="2.5" fill="#7C3AED"
+                      [class.dot-active]="tip()?.chartId === 'contacts' && tip()?.pointIndex === i"/>
+                    @if (tip()?.chartId === 'contacts' && tip()?.pointIndex === i) {
+                      <circle class="trend-pulse" [attr.cx]="p.x" [attr.cy]="p.y" r="3" fill="none" stroke="#7C3AED"/>
+                      <line class="trend-guide" [attr.x1]="p.x" [attr.y1]="p.y" [attr.x2]="p.x" [attr.y2]="chartBaseline"/>
+                    }
+                    <circle class="trend-hit" [attr.cx]="p.x" [attr.cy]="p.y" r="9" fill="transparent"
+                      (mouseenter)="showPointTip('contacts', i, p, t().trends.newContacts, '#7C3AED', p.value + '')"
+                      (mouseleave)="hideTip()"/>
+                  }
+                </svg>
+                @if (tip(); as tp) {
+                  @if (tp.chartId === 'contacts') {
+                    <div class="chart-tooltip" [style.left.%]="tp.xPct" [style.top.%]="tp.yPct" [style.transform]="'translate(-50%,-125%) ' + tipCounterScale('contacts')">
+                      <div class="tip-title">{{ tp.title }}</div>
+                      @for (l of tp.lines; track l.label) {
+                        <div class="tip-line"><span class="tip-dot" [style.background]="l.color"></span>{{ l.label }} : <b [style.color]="l.color">{{ l.value }}</b></div>
+                      }
+                    </div>
+                  }
+                }
+              </div>
+            </div>
+            <div class="trend-labels">
+              @for (p of newContactsTrend(); track p.label) { <span>{{ p.label }}</span> }
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Aire : valeur du pipeline actif par mois -->
+      <div class="card trend-card">
+        <div class="card-header">
+          <div class="card-title">
+            <div class="card-title-icon">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 17l6-6 4 4 8-9"/><path d="M3 21h18"/></svg>
+            </div>
+            {{ t().trends.pipelineValue }}
+          </div>
+          <span class="card-meta">{{ formatMontant(pipelineTrendTotal()) }} · {{ periodLabel() }}</span>
+        </div>
+        <div class="card-body">
+          @if (loading()) {
+            <div class="skeleton-list"><div class="skeleton-row" style="height:100px"></div></div>
+          } @else if (pipelineTrendTotal() === 0) {
+            <div class="empty-state">{{ t().trends.noData }}</div>
+          } @else {
+            <div class="zoom-wrap"
+                 [class.zoomed]="isZoomed('pipeline')"
+                 (wheel)="onZoomWheel($event, 'pipeline')"
+                 (mousedown)="onZoomPanStart($event, 'pipeline')"
+                 (mousemove)="onZoomPanMove($event, 'pipeline')"
+                 (mouseup)="onZoomPanEnd('pipeline')"
+                 (mouseleave)="onZoomPanEnd('pipeline')"
+                 (dblclick)="resetZoom('pipeline')">
+              @if (isZoomed('pipeline')) {
+                <button type="button" class="zoom-reset" (click)="resetZoom('pipeline', $event)">
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M21 12a9 9 0 11-3-6.7"/><polyline points="21 3 21 9 15 9"/></svg>
+                  Réinitialiser
+                </button>
+              }
+              <div class="zoom-content" [style]="zoomStyle('pipeline')">
+                <svg class="trend-svg" [class.revealed]="revealed()" [attr.viewBox]="'0 0 ' + chartW + ' ' + chartH" preserveAspectRatio="none">
+                  <defs>
+                    <linearGradient id="pipelineAreaGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stop-color="#7C3AED" stop-opacity="0.22"/>
+                      <stop offset="100%" stop-color="#7C3AED" stop-opacity="0"/>
+                    </linearGradient>
+                  </defs>
+                  <line [attr.x1]="6" [attr.y1]="chartBaseline" [attr.x2]="chartW - 6" [attr.y2]="chartBaseline" class="trend-axis"/>
+                  <path class="trend-area-fill" [attr.d]="pipelineAreaPath()" fill="url(#pipelineAreaGrad)" stroke="none"/>
+                  <path class="trend-line" [attr.d]="pipelineLinePath()" fill="none" stroke="#7C3AED" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" pathLength="1"/>
+                  @for (p of pipelineTrend(); track p.label; let i = $index) {
+                    @if (tip()?.chartId === 'pipeline' && tip()?.pointIndex === i) {
+                      <circle class="trend-pulse" [attr.cx]="p.x" [attr.cy]="p.y" r="3" fill="none" stroke="#7C3AED"/>
+                      <line class="trend-guide" [attr.x1]="p.x" [attr.y1]="p.y" [attr.x2]="p.x" [attr.y2]="chartBaseline"/>
+                    }
+                    <circle class="trend-dot" [attr.cx]="p.x" [attr.cy]="p.y" r="2.5" fill="#7C3AED"
+                      [class.dot-active]="tip()?.chartId === 'pipeline' && tip()?.pointIndex === i"/>
+                    <circle class="trend-hit" [attr.cx]="p.x" [attr.cy]="p.y" r="9" fill="transparent"
+                      (mouseenter)="showPointTip('pipeline', i, p, t().trends.pipelineValue, '#7C3AED', formatMontant(p.value))"
+                      (mouseleave)="hideTip()"/>
+                  }
+                </svg>
+                @if (tip(); as tp) {
+                  @if (tp.chartId === 'pipeline') {
+                    <div class="chart-tooltip" [style.left.%]="tp.xPct" [style.top.%]="tp.yPct" [style.transform]="'translate(-50%,-125%) ' + tipCounterScale('pipeline')">
+                      <div class="tip-title">{{ tp.title }}</div>
+                      @for (l of tp.lines; track l.label) {
+                        <div class="tip-line"><span class="tip-dot" [style.background]="l.color"></span>{{ l.label }} : <b [style.color]="l.color">{{ l.value }}</b></div>
+                      }
+                    </div>
+                  }
+                }
+              </div>
+            </div>
+            <div class="trend-labels">
+              @for (p of pipelineTrend(); track p.label) { <span>{{ p.label }}</span> }
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Histogramme : deals gagnés vs perdus par mois -->
+      <div class="card trend-card">
+        <div class="card-header">
+          <div class="card-title">
+            <div class="card-title-icon">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg>
+            </div>
+            {{ t().trends.wonVsLost }}
+          </div>
+          <span class="card-meta trend-legend">
+            <span class="legend-chip"><span class="legend-dot" style="background:#16A34A"></span>{{ t().trends.legendWon }}</span>
+            <span class="legend-chip"><span class="legend-dot" style="background:#DC2626"></span>{{ t().trends.legendLost }}</span>
+          </span>
+        </div>
+        <div class="card-body">
+          @if (loading()) {
+            <div class="skeleton-list"><div class="skeleton-row" style="height:100px"></div></div>
+          } @else if (wonTotalPeriod() === 0 && lostTotalPeriod() === 0) {
+            <div class="empty-state">{{ t().trends.noData }}</div>
+          } @else {
+            <div class="zoom-wrap"
+                 [class.zoomed]="isZoomed('wonlost')"
+                 (wheel)="onZoomWheel($event, 'wonlost')"
+                 (mousedown)="onZoomPanStart($event, 'wonlost')"
+                 (mousemove)="onZoomPanMove($event, 'wonlost')"
+                 (mouseup)="onZoomPanEnd('wonlost')"
+                 (mouseleave)="onZoomPanEnd('wonlost')"
+                 (dblclick)="resetZoom('wonlost')">
+              @if (isZoomed('wonlost')) {
+                <button type="button" class="zoom-reset" (click)="resetZoom('wonlost', $event)">
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M21 12a9 9 0 11-3-6.7"/><polyline points="21 3 21 9 15 9"/></svg>
+                  Réinitialiser
+                </button>
+              }
+              <div class="zoom-content" [style]="zoomStyle('wonlost')">
+                <svg class="trend-svg" [attr.viewBox]="'0 0 ' + chartW + ' ' + chartH" preserveAspectRatio="none">
+                  <line [attr.x1]="6" [attr.y1]="chartBaseline" [attr.x2]="chartW - 6" [attr.y2]="chartBaseline" class="trend-axis"/>
+                  @for (bar of wonLostTrend(); track bar.label; let i = $index) {
+                    <g class="bar-group" [class.bar-group-active]="tip()?.chartId === 'wonlost' && tip()?.pointIndex === i"
+                       (mouseenter)="showBarTip(i, bar)" (mouseleave)="hideTip()">
+                      <rect class="bar-hit" [attr.x]="bar.xWon - 4" [attr.y]="8" [attr.width]="bar.barW * 2 + 8" [attr.height]="chartBaseline - 8" fill="transparent"/>
+                      <rect class="trend-bar" [attr.x]="bar.xWon" [attr.width]="bar.barW"
+                        [attr.y]="revealed() ? bar.yWon : chartBaseline" [attr.height]="revealed() ? bar.hWon : 0"
+                        fill="#16A34A" rx="1.5"/>
+                      <rect class="trend-bar" [attr.x]="bar.xLost" [attr.width]="bar.barW"
+                        [attr.y]="revealed() ? bar.yLost : chartBaseline" [attr.height]="revealed() ? bar.hLost : 0"
+                        fill="#DC2626" rx="1.5"/>
+                    </g>
+                  }
+                </svg>
+                @if (tip(); as tp) {
+                  @if (tp.chartId === 'wonlost') {
+                    <div class="chart-tooltip" [style.left.%]="tp.xPct" [style.top.%]="tp.yPct" [style.transform]="'translate(-50%,-125%) ' + tipCounterScale('wonlost')">
+                      <div class="tip-title">{{ tp.title }}</div>
+                      @for (l of tp.lines; track l.label) {
+                        <div class="tip-line"><span class="tip-dot" [style.background]="l.color"></span>{{ l.label }} : <b [style.color]="l.color">{{ l.value }}</b></div>
+                      }
+                    </div>
+                  }
+                }
+              </div>
+            </div>
+            <div class="trend-labels">
+              @for (bar of wonLostTrend(); track bar.label) { <span>{{ bar.label }}</span> }
+            </div>
+          }
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ── Body ── -->
+    <div class="dash-body" [class.revealed]="revealed()">
+
+      <!-- ═══ Left column ═══ -->
+      <div class="col-main">
+
+        <!-- ① Pipeline par étape -->
+        <section class="card">
+          <div class="card-header">
+            <div class="card-title">
+              <div class="card-title-icon">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+              </div>
+              {{ t().sections.pipelineByStage }}
+            </div>
+            <div class="card-header-right">
+              <span class="card-meta">{{ totalDeals() }} {{ t().meta.dealsAnd }} {{ formatMontant(pipelineActif()) }}</span>
+              <a routerLink="/app/deals" class="card-link">{{ t().link.view }}</a>
+            </div>
+          </div>
+          <div class="card-body">
+            @if (loading()) {
+              <div class="skeleton-list">@for (i of [1,2,3,4]; track i) { <div class="skeleton-row" style="height:38px"></div> }</div>
+            }
+            @if (!loading() && pipelineStages().length > 0) {
+              <div class="pipeline-chart">
+                @for (s of pipelineStages(); track s.key) {
+                  <div class="pipeline-row" [class.hovered]="hoveredStage() === s.key"
+                       (mouseenter)="setHoverStage(s.key)" (mouseleave)="setHoverStage(null)">
+                    <div class="pipeline-label-col">
+                      <span class="pipeline-dot" [style.background]="s.color"></span>
+                      <span class="pipeline-stage-name">{{ s.label }}</span>
+                    </div>
+                    <div class="pipeline-bar-col">
+                      <div class="pipeline-bar-track">
+                        <div class="pipeline-bar-fill" [style.width]="(revealed() ? s.pct : 0) + '%'" [style.background]="s.color"></div>
+                      </div>
+                    </div>
+                    <div class="pipeline-stats-col">
+                      <span class="pipeline-count" [style.color]="s.color">{{ s.count }}</span>
+                      <span class="pipeline-montant">{{ formatMontant(s.montant) }}</span>
+                    </div>
+                  </div>
+                }
+              </div>
+            }
+            @if (!loading() && pipelineStages().length === 0) {
+              <div class="empty-state">{{ t().empty.noDeals }}&nbsp;<a routerLink="/app/deals">{{ t().empty.createOne }}</a></div>
+            }
+          </div>
+        </section>
+
+        <!-- ① bis Prévision pipeline pondérée — montant × probabilité, mois à venir -->
+        <section class="card trend-card">
+          <div class="card-header">
+            <div class="card-title">
+              <div class="card-title-icon">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 6l-9.5 9.5-5-5L1 18"/><path d="M17 6h6v6"/></svg>
+              </div>
+              {{ t().sections.pipelineForecast }}
+            </div>
+            <span class="card-meta">{{ formatMontant(forecastTotal()) }} · {{ t().trends.nextNMonths.replace('{n}', trendMonths() + '') }}</span>
+          </div>
+          <div class="card-body">
+            @if (loading()) {
+              <div class="skeleton-list"><div class="skeleton-row" style="height:120px"></div></div>
+            } @else if (forecastTotal() === 0) {
+              <div class="empty-state">{{ t().empty.noForecastData }}</div>
+            } @else {
+              <div class="zoom-wrap"
+                   [class.zoomed]="isZoomed('forecast')"
+                   (wheel)="onZoomWheel($event, 'forecast')"
+                   (mousedown)="onZoomPanStart($event, 'forecast')"
+                   (mousemove)="onZoomPanMove($event, 'forecast')"
+                   (mouseup)="onZoomPanEnd('forecast')"
+                   (mouseleave)="onZoomPanEnd('forecast')"
+                   (dblclick)="resetZoom('forecast')">
+                @if (isZoomed('forecast')) {
+                  <button type="button" class="zoom-reset" (click)="resetZoom('forecast', $event)">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M21 12a9 9 0 11-3-6.7"/><polyline points="21 3 21 9 15 9"/></svg>
+                    Réinitialiser
+                  </button>
+                }
+                <div class="zoom-content" [style]="zoomStyle('forecast')">
+                  <svg class="trend-svg" [class.revealed]="revealed()" [attr.viewBox]="'0 0 ' + chartW + ' ' + chartH" preserveAspectRatio="none">
+                    <defs>
+                      <linearGradient id="forecastAreaGrad" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stop-color="#7C3AED" stop-opacity="0.22"/>
+                        <stop offset="100%" stop-color="#7C3AED" stop-opacity="0"/>
+                      </linearGradient>
+                    </defs>
+                    <line [attr.x1]="6" [attr.y1]="chartBaseline" [attr.x2]="chartW - 6" [attr.y2]="chartBaseline" class="trend-axis"/>
+                    <path class="trend-area-fill" [attr.d]="forecastAreaPath()" fill="url(#forecastAreaGrad)" stroke="none"/>
+                    <path class="trend-line" [attr.d]="forecastLinePath()" fill="none" stroke="#7C3AED" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" pathLength="1"/>
+                    @for (p of pipelineForecastTrend(); track p.label; let i = $index) {
+                      @if (tip()?.chartId === 'forecast' && tip()?.pointIndex === i) {
+                        <circle class="trend-pulse" [attr.cx]="p.x" [attr.cy]="p.y" r="3" fill="none" stroke="#7C3AED"/>
+                        <line class="trend-guide" [attr.x1]="p.x" [attr.y1]="p.y" [attr.x2]="p.x" [attr.y2]="chartBaseline"/>
+                      }
+                      <circle class="trend-dot" [attr.cx]="p.x" [attr.cy]="p.y" r="2.5" fill="#7C3AED"
+                        [class.dot-active]="tip()?.chartId === 'forecast' && tip()?.pointIndex === i"/>
+                      <circle class="trend-hit" [attr.cx]="p.x" [attr.cy]="p.y" r="9" fill="transparent"
+                        (mouseenter)="showPointTip('forecast', i, p, t().sections.pipelineForecast, '#7C3AED', formatMontant(p.value))"
+                        (mouseleave)="hideTip()"/>
+                    }
+                  </svg>
+                  @if (tip(); as tp) {
+                    @if (tp.chartId === 'forecast') {
+                      <div class="chart-tooltip" [style.left.%]="tp.xPct" [style.top.%]="tp.yPct" [style.transform]="'translate(-50%,-125%) ' + tipCounterScale('forecast')">
+                        <div class="tip-title">{{ tp.title }}</div>
+                        @for (l of tp.lines; track l.label) {
+                          <div class="tip-line"><span class="tip-dot" [style.background]="l.color"></span>{{ l.label }} : <b [style.color]="l.color">{{ l.value }}</b></div>
+                        }
+                      </div>
+                    }
+                  }
+                </div>
+              </div>
+              <div class="trend-labels">
+                @for (p of pipelineForecastTrend(); track p.label) { <span>{{ p.label }}</span> }
+              </div>
+            }
+          </div>
+        </section>
+
+        <!-- ② Entonnoir des leads — funnel visuel, rampe violette progressive -->
+        <section class="card">
+          <div class="card-header">
+            <div class="card-title">
+              <div class="card-title-icon">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M3 3h18l-7 9v6l-4 2V12L3 3z"/>
+                </svg>
+              </div>
+              {{ t().sections.leadFunnel }}
+            </div>
+            <div class="card-header-right">
+              <span class="card-meta">{{ totalContacts() }} {{ t().meta.contactsCount }}</span>
+              <a routerLink="/app/contacts" class="card-link">{{ t().link.view }}</a>
+            </div>
+          </div>
+          <div class="card-body">
+            @if (loading()) {
+              <div class="skeleton-list">@for (i of [1,2,3,4]; track i) { <div class="skeleton-row" style="height:38px"></div> }</div>
+            }
+            @if (!loading() && leadFunnel().length > 0) {
+              <div class="funnel-viz">
+                @for (s of leadFunnel(); track s.stage; let i = $index) {
+                  @if (i > 0) {
+                    <div class="funnel-drop">
+                      <svg width="10" height="16" viewBox="0 0 10 16" fill="none"><path d="M5 0v11M1.5 8.5L5 13l3.5-4.5" stroke="#CBD5E1" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                      <span class="funnel-drop-pct">{{ s.convPct }}%</span>
+                    </div>
+                  }
+                  <div class="funnel-tier" [style.width]="(revealed() ? s.pct : 0) + '%'" [style.background]="s.color">
+                    <span class="funnel-tier-name" [style.color]="s.textColor">{{ s.label }}</span>
+                    <span class="funnel-tier-count" [style.color]="s.textColor">{{ s.count }}</span>
+                  </div>
+                }
+              </div>
+            }
+            @if (!loading() && leadFunnel().length === 0) {
+              <div class="empty-state">{{ t().empty.noLeads }}</div>
+            }
+          </div>
+        </section>
+
+      </div>
+
+      <!-- ═══ Right column ═══ -->
+      <div class="col-side">
+
+        <!-- ③ Taux de closing — anneau segmenté gagné/perdu/en cours -->
+        <section class="card">
+          <div class="card-header">
+            <div class="card-title">
+              <div class="card-title-icon">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+              </div>
+              {{ t().sections.closingRate }}
+            </div>
+            <span class="card-meta">{{ totalDeals() }} deals</span>
+          </div>
+          <div class="card-body">
+            @if (!loading() && dealOutcomeRing().length > 0) {
+              <div class="donut-wrap">
+                <div class="donut-chart-col zoom-wrap"
+                     [class.zoomed]="isZoomed('ring-outcome')"
+                     (wheel)="onZoomWheel($event, 'ring-outcome')"
+                     (mousedown)="onZoomPanStart($event, 'ring-outcome')"
+                     (mousemove)="onZoomPanMove($event, 'ring-outcome')"
+                     (mouseup)="onZoomPanEnd('ring-outcome')"
+                     (mouseleave)="onZoomPanEnd('ring-outcome')"
+                     (dblclick)="resetZoom('ring-outcome')">
+                  <div class="zoom-content" [style]="zoomStyle('ring-outcome')">
+                    <svg class="donut-svg" [class.revealed]="revealed()" width="150" height="150" viewBox="0 0 120 120">
+                      @for (seg of dealOutcomeRing(); track seg.key) {
+                        <path [attr.d]="seg.path" [attr.fill]="seg.color" stroke="white" stroke-width="2.5"
+                          class="donut-seg"
+                          [style.transform]="segmentTransform(seg.midAngle, tip()?.chartId === 'ring-outcome' && tip()?.pointIndex === seg.index)"
+                          (mouseenter)="showRingTip('ring-outcome', seg.index, seg.midAngle, seg.label, seg.color, seg.count, seg.percentage)"
+                          (mouseleave)="hideTip()"/>
+                      }
+                    </svg>
+                    <div class="donut-center">
+                      <div class="donut-total" style="color:#16A34A">{{ winRate() }}%</div>
+                      <div class="donut-sublabel">{{ t().gauge.winRateLabel }}</div>
+                    </div>
+                    @if (tip(); as tp) {
+                      @if (tp.chartId === 'ring-outcome') {
+                        <div class="chart-tooltip" [style.left.%]="tp.xPct" [style.top.%]="tp.yPct" [style.transform]="'translate(-50%,-115%) ' + tipCounterScale('ring-outcome')">
+                          <div class="tip-title">{{ tp.title }}</div>
+                          @for (l of tp.lines; track l.label) {
+                            <div class="tip-line"><span class="tip-dot" [style.background]="l.color"></span><b [style.color]="l.color">{{ l.label }}</b></div>
+                          }
+                        </div>
+                      }
+                    }
+                  </div>
+                </div>
+                <div class="donut-legend">
+                  @for (seg of dealOutcomeRing(); track seg.key; let i = $index) {
+                    <div class="donut-legend-row" [class.revealed]="revealed()" [class.legend-active]="tip()?.chartId === 'ring-outcome' && tip()?.pointIndex === i"
+                         [style.transition-delay]="(i * 70) + 'ms'"
+                         (mouseenter)="showRingTip('ring-outcome', seg.index, seg.midAngle, seg.label, seg.color, seg.count, seg.percentage)"
+                         (mouseleave)="hideTip()">
+                      <span class="donut-legend-dot" [style.background]="seg.color"></span>
+                      <span class="donut-legend-label">{{ seg.label }}</span>
+                      <span class="donut-legend-val" [style.color]="seg.color">{{ seg.count }}</span>
+                      <span class="donut-legend-pct">{{ seg.percentage }}%</span>
+                    </div>
+                  }
+                </div>
+              </div>
+              <div class="gauge-summary">
+                <div class="gauge-stat-row">
+                  <span class="gauge-stat-label" style="font-weight:600;color:#0F172A">{{ t().gauge.pipeline }}</span>
+                  <span class="gauge-stat-val accent">{{ formatMontant(pipelineActif()) }}</span>
+                </div>
+                <div class="gauge-stat-row">
+                  <span class="gauge-stat-label" style="font-weight:600;color:#0F172A">{{ t().gauge.campaigns }}</span>
+                  <span class="gauge-stat-val">{{ campagnesEnvoyees() }}</span>
+                </div>
+              </div>
+            }
+            @if (!loading() && dealOutcomeRing().length === 0) {
+              <div class="empty-state">{{ t().empty.noDeals }}</div>
+            }
+            @if (loading()) {
+              <div class="skeleton-list">@for (i of [1,2,3]; track i) { <div class="skeleton-row"></div> }</div>
+            }
+          </div>
+        </section>
+
+        <!-- ④ Campagnes par type — pie chart, référence CampaignService -->
+        <section class="card">
+          <div class="card-header">
+            <div class="card-title">
+              <div class="card-title-icon">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21.21 15.89A10 10 0 118 2.83"/><path d="M22 12A10 10 0 0012 2v10z"/>
+                </svg>
+              </div>
+              {{ t().sections.campaignsByType }}
+            </div>
+            <span class="card-meta">{{ allCampaigns().length }} {{ t().meta.campaignsCount }}</span>
+          </div>
+          <div class="card-body">
+            @if (!loading() && campaignsByType().length > 0) {
+              <div class="donut-wrap">
+                <div class="donut-chart-col zoom-wrap"
+                     [class.zoomed]="isZoomed('ring-campaigns')"
+                     (wheel)="onZoomWheel($event, 'ring-campaigns')"
+                     (mousedown)="onZoomPanStart($event, 'ring-campaigns')"
+                     (mousemove)="onZoomPanMove($event, 'ring-campaigns')"
+                     (mouseup)="onZoomPanEnd('ring-campaigns')"
+                     (mouseleave)="onZoomPanEnd('ring-campaigns')"
+                     (dblclick)="resetZoom('ring-campaigns')">
+                  <div class="zoom-content" [style]="zoomStyle('ring-campaigns')">
+                    <svg class="donut-svg" [class.revealed]="revealed()" width="150" height="150" viewBox="0 0 120 120">
+                      @for (seg of campaignsByType(); track seg.label) {
+                        <path [attr.d]="seg.path" [attr.fill]="seg.color" stroke="white" stroke-width="2.5"
+                          class="donut-seg"
+                          [style.transform]="segmentTransform(seg.midAngle, tip()?.chartId === 'ring-campaigns' && tip()?.pointIndex === seg.index)"
+                          (mouseenter)="showRingTip('ring-campaigns', seg.index, seg.midAngle, seg.label, seg.color, seg.count, seg.percentage)"
+                          (mouseleave)="hideTip()"/>
+                      }
+                    </svg>
+                    @if (tip(); as tp) {
+                      @if (tp.chartId === 'ring-campaigns') {
+                        <div class="chart-tooltip" [style.left.%]="tp.xPct" [style.top.%]="tp.yPct" [style.transform]="'translate(-50%,-115%) ' + tipCounterScale('ring-campaigns')">
+                          <div class="tip-title">{{ tp.title }}</div>
+                          @for (l of tp.lines; track l.label) {
+                            <div class="tip-line"><span class="tip-dot" [style.background]="l.color"></span><b [style.color]="l.color">{{ l.label }}</b></div>
+                          }
+                        </div>
+                      }
+                    }
+                  </div>
+                </div>
+                <div class="donut-legend">
+                  @for (seg of campaignsByType(); track seg.label; let i = $index) {
+                    <div class="donut-legend-row" [class.revealed]="revealed()" [class.legend-active]="tip()?.chartId === 'ring-campaigns' && tip()?.pointIndex === i"
+                         [style.transition-delay]="(i * 70) + 'ms'"
+                         (mouseenter)="showRingTip('ring-campaigns', seg.index, seg.midAngle, seg.label, seg.color, seg.count, seg.percentage)"
+                         (mouseleave)="hideTip()">
+                      <span class="donut-legend-dot" [style.background]="seg.color"></span>
+                      <span class="donut-legend-label">{{ seg.label }}</span>
+                      <span class="donut-legend-val" [style.color]="seg.color">{{ seg.count }}</span>
+                      <span class="donut-legend-pct">{{ seg.percentage }}%</span>
+                    </div>
+                  }
+                </div>
+              </div>
+            }
+            @if (!loading() && campaignsByType().length === 0) {
+              <div class="empty-state">{{ t().empty.noCampaignData }}</div>
+            }
+            @if (loading()) {
+              <div class="skeleton-list">@for (i of [1,2,3]; track i) { <div class="skeleton-row"></div> }</div>
+            }
+          </div>
+        </section>
+
+        <!-- ⑤ Activités récentes -->
+        <section class="card">
+          <div class="card-header">
+            <div class="card-title">
+              <div class="card-title-icon">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+              </div>
+              {{ t().sections.recentActivities }}
+            </div>
+            <a routerLink="/app/activities" class="card-link">{{ t().link.viewAll }}</a>
+          </div>
+          <div class="act-breakdown">
+            @for (ac of activityCounts(); track ac.label) {
+              <div class="act-type-chip" [style.background]="ac.color + '14'" [style.color]="ac.color">
+                <span class="act-chip-count">{{ ac.count }}</span>
+                <span class="act-chip-label">{{ ac.label }}</span>
+              </div>
+            }
+          </div>
+          <div class="card-body">
+            @if (loading()) {
+              <div class="skeleton-list">@for (i of [1,2,3,4]; track i) { <div class="skeleton-row"></div> }</div>
+            } @else if (activityTimeline().length > 0) {
+              <div class="activity-timeline">
+                @for (group of activityTimeline(); track group.key) {
+                  <div class="timeline-group">
+                    <div class="timeline-day-label">{{ group.label }}</div>
+                    @for (a of group.items; track a.id; let last = $last) {
+                      <div class="timeline-row">
+                        <div class="timeline-node">
+                          <div class="timeline-icon-box" [ngClass]="'act-type-' + a.type">
+                            @if (a.type === 'TACHE') {
+                              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+                            }
+                            @if (a.type === 'NOTE') {
+                              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                            }
+                            @if (a.type === 'SYSTEME') {
+                              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
+                            }
+                          </div>
+                          @if (!last) { <span class="timeline-line"></span> }
+                        </div>
+                        <div class="timeline-info">
+                          <div class="timeline-titre">{{ a.titre }}</div>
+                          <div class="timeline-meta">
+                            @if (a.contact) {
+                              <span class="timeline-chip">{{ a.contact.prenom }} {{ a.contact.nom }}</span>
+                            }
+                            @if (a.deal?.titre) {
+                              <span class="timeline-chip deal">{{ a.deal?.titre }}</span>
+                            }
+                            <span class="timeline-time">{{ tempsRelatif(a.dateCreation) }}</span>
+                          </div>
+                        </div>
+                      </div>
+                    }
+                  </div>
+                }
+              </div>
+            } @else {
+              <div class="activity-empty">
+                <div class="activity-empty-icon">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                </div>
+                <div class="activity-empty-title">{{ t().empty.noRecentActivity }}</div>
+                <div class="activity-empty-sub">{{ t().empty.noRecentActivitySub }}</div>
+                <a routerLink="/app/activities" class="activity-empty-cta">{{ t().empty.createActivityCta }}</a>
+              </div>
+            }
+          </div>
+        </section>
+
+      </div>
+    </div>
+
+    <!-- ── Heatmap d'activité — jour × heure, sur tout l'historique chargé ── -->
+    <section class="card heatmap-card" [class.revealed]="revealed()">
+      <div class="card-header">
+        <div class="card-title">
+          <div class="card-title-icon">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+          </div>
+          {{ t().sections.activityHeatmap }}
+        </div>
+        <span class="card-meta">{{ activityHeatmap().total }} {{ t().meta.activitiesCount }}</span>
+      </div>
+      <div class="card-body">
+        @if (loading()) {
+          <div class="skeleton-list"><div class="skeleton-row" style="height:160px"></div></div>
+        } @else if (activityHeatmap().total === 0) {
+          <div class="empty-state">{{ t().empty.noActivityData }}</div>
+        } @else {
+          <div class="heatmap-wrap">
+            <div class="heatmap-grid">
+              @for (row of activityHeatmap().grid; track $index; let d = $index) {
+                <div class="heatmap-row">
+                  <span class="heatmap-day-label">{{ t().daysShort[d] }}</span>
+                  <div class="heatmap-cells">
+                    @for (count of row; track $index; let h = $index) {
+                      <span class="heatmap-cell" [style.background]="heatColor(count, activityHeatmap().max)" [title]="t().daysShort[d] + ' ' + h + 'h — ' + count"></span>
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+            <div class="heatmap-hours">
+              <span class="heatmap-day-label-spacer"></span>
+              <div class="heatmap-hour-labels">
+                @for (h of heatmapHourLabels; track h) {
+                  <span class="heatmap-hour-label" [style.left.%]="(h / 24) * 100">{{ h }}h</span>
+                }
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    </section>
+
+  </div>
+</div>
